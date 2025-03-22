@@ -1,6 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Import react-grid-layout styles */
+@import './styles/react-grid-layout.css';
  
 @layer base {
   :root {

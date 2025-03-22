@@ -1,0 +1,63 @@
+/* Custom styles for edit mode */
+
+/* Style the edit mode grid to match the normal view */
+.edit-mode-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 2rem;
+}
+
+@media (min-width: 768px) {
+  .edit-mode-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Control column span for charts */
+.edit-mode-grid .col-span-full {
+  grid-column: 1 / -1;
+}
+
+.edit-mode-grid .col-span-1 {
+  grid-column: auto / span 1;
+}
+
+/* Chart container styles */
+.edit-chart-container {
+  border: 2px dashed #e5e7eb;
+  border-radius: 0.5rem;
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.edit-chart-container:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Active drag styling */
+.edit-chart-container.dragging,
+.edit-chart-container.opacity-50 {
+  opacity: 0.6;
+  border-color: #3b82f6;
+  border-style: solid;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Add a cursor that indicates draggable */
+.edit-chart-container {
+  cursor: grab;
+}
+
+.edit-chart-container:active {
+  cursor: grabbing;
+}
+
+/* Section being edited */
+[data-edit-active="true"] {
+  background-color: #f8fafc;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+}

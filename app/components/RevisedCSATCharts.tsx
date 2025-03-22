@@ -12,6 +12,12 @@ import {
 } from './charts/csat/revised';
 import { VisualizationToggle } from './VisualizationToggle';
 import { saveVisualizationPreferences, loadVisualizationPreferences } from '../utils/storage/localStorage';
+import { LayoutManagerWithGrid } from './LayoutManagerWithGrid';
+import { EditLayoutButton } from './EditLayoutButton';
+import {
+  CSAT_CHARTS_LAYOUT_KEY, 
+  getDefaultCSATChartsLayout 
+} from '../utils/storage/layoutStorage';
 
 interface CSATChartsProps {
   data: CSATData[];
@@ -19,6 +25,8 @@ interface CSATChartsProps {
 }
 
 export function RevisedCSATCharts({ data, dateRange }: CSATChartsProps) {
+  // State for edit mode
+  const [isEditingLayout, setIsEditingLayout] = useState(false);
   // State for visualization preferences
   const [visualPreferences, setVisualPreferences] = useState({
     helpTopics: 'horizontalBar', // default
@@ -83,9 +91,40 @@ export function RevisedCSATCharts({ data, dateRange }: CSATChartsProps) {
     );
   }
 
+  // Function to toggle edit mode
+  const toggleEditMode = () => {
+    // If currently editing another section, don't allow switching to edit mode
+    const otherSectionEditing = document.querySelector('[data-edit-active="true"]');
+    if (otherSectionEditing && !isEditingLayout) {
+      alert('Please save or cancel editing in the other section first.');
+      return;
+    }
+    
+    setIsEditingLayout(!isEditingLayout);
+  };
+
+  // Function to handle save
+  const handleSaveLayout = () => {
+    setIsEditingLayout(false);
+  };
+
+  // Function to handle cancel
+  const handleCancelLayout = () => {
+    setIsEditingLayout(false);
+  };
+
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-      <h2 className="text-xl font-semibold mb-2">Support Analytics</h2>
+    <div 
+      className="bg-white p-6 rounded-lg shadow-md mb-6"
+      data-edit-active={isEditingLayout ? "true" : "false"}
+    >
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">Support Analytics</h2>
+        <EditLayoutButton 
+          isEditing={isEditingLayout} 
+          onClick={toggleEditMode} 
+        />
+      </div>
       
       <SyntheticDataIndicator 
         isVisible={hasSyntheticTickets}
@@ -97,91 +136,100 @@ export function RevisedCSATCharts({ data, dateRange }: CSATChartsProps) {
       {/* Summary Stats */}
       {latestData && <SummaryStats data={latestData} />}
       
-      {/* Monthly Tickets Chart - Only show for date ranges longer than a month */}
-      {dateRange !== 'month' && (
-        <div className="mb-12">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-medium">Monthly Ticket Volume</h3>
-            <VisualizationToggle
-              current={visualPreferences.monthlyTickets}
-              options={[
-                { value: 'line', label: 'Line' },
-                { value: 'bar', label: 'Bar' },
-                { value: 'area', label: 'Area' }
-              ]}
-              onChange={handleVisualizationChange}
-              chartName="monthlyTickets"
+      
+      <LayoutManagerWithGrid
+        storageKey={CSAT_CHARTS_LAYOUT_KEY}
+        defaultLayout={getDefaultCSATChartsLayout()}
+        isEditing={isEditingLayout}
+        onSave={handleSaveLayout}
+        onCancel={handleCancelLayout}
+      >
+        {/* Monthly Tickets Chart - Only show for date ranges longer than a month */}
+        {dateRange !== 'month' && (
+          <div id="monthlyTickets" className="mb-6">
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="text-lg font-medium">Monthly Ticket Volume</h3>
+              <VisualizationToggle
+                current={visualPreferences.monthlyTickets}
+                options={[
+                  { value: 'line', label: 'Line' },
+                  { value: 'bar', label: 'Bar' },
+                  { value: 'area', label: 'Area' }
+                ]}
+                onChange={handleVisualizationChange}
+                chartName="monthlyTickets"
+              />
+            </div>
+            <MonthlyTicketsChart 
+              data={data} 
+              visualizationType={visualPreferences.monthlyTickets as 'line' | 'bar' | 'area'}
             />
           </div>
-          <MonthlyTicketsChart 
-            data={data} 
-            visualizationType={visualPreferences.monthlyTickets}
-          />
-        </div>
-      )}
-      
-      <div className="mb-12">
+        )}
+        
         {/* Help Topics Chart */}
-        <div className="flex justify-between items-center">
-          <h3 className="text-lg font-medium">Tickets by Help Topic</h3>
-          <VisualizationToggle
-            current={visualPreferences.helpTopics}
-            options={[
-              { value: 'horizontalBar', label: 'Bar' },
-              { value: 'pie', label: 'Pie' },
-              { value: 'treemap', label: 'TreeMap' }
-            ]}
-            onChange={handleVisualizationChange}
-            chartName="helpTopics"
+        <div id="helpTopics" className="mb-6">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-lg font-medium">Tickets by Help Topic</h3>
+            <VisualizationToggle
+              current={visualPreferences.helpTopics}
+              options={[
+                { value: 'horizontalBar', label: 'Bar' },
+                { value: 'pie', label: 'Pie' },
+                { value: 'treemap', label: 'TreeMap' }
+              ]}
+              onChange={handleVisualizationChange}
+              chartName="helpTopics"
+            />
+          </div>
+          <HelpTopicsChart 
+            data={data} 
+            visualizationType={visualPreferences.helpTopics as 'horizontalBar' | 'pie' | 'treemap'}
           />
         </div>
-        <HelpTopicsChart 
-          data={data} 
-          visualizationType={visualPreferences.helpTopics}
-        />
-      </div>
-      
-      <div className="mb-12">
+        
         {/* Impact Level Chart */}
-        <div className="flex justify-between items-center">
-          <h3 className="text-lg font-medium">Tickets by Impact Level</h3>
-          <VisualizationToggle
-            current={visualPreferences.impactLevel}
-            options={[
-              { value: 'pie', label: 'Pie' },
-              { value: 'bar', label: 'Bar' },
-              { value: 'donut', label: 'Donut' }
-            ]}
-            onChange={handleVisualizationChange}
-            chartName="impactLevel"
+        <div id="impactLevel" className="mb-6">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-lg font-medium">Tickets by Impact Level</h3>
+            <VisualizationToggle
+              current={visualPreferences.impactLevel}
+              options={[
+                { value: 'pie', label: 'Pie' },
+                { value: 'bar', label: 'Bar' },
+                { value: 'donut', label: 'Donut' }
+              ]}
+              onChange={handleVisualizationChange}
+              chartName="impactLevel"
+            />
+          </div>
+          <ImpactLevelChart 
+            data={data} 
+            visualizationType={visualPreferences.impactLevel as 'pie' | 'bar' | 'donut'}
           />
         </div>
-        <ImpactLevelChart 
-          data={data} 
-          visualizationType={visualPreferences.impactLevel}
-        />
-      </div>
-      
-      <div className="mb-12">
+        
         {/* Ticket Types Chart */}
-        <div className="flex justify-between items-center">
-          <h3 className="text-lg font-medium">Tickets by Type</h3>
-          <VisualizationToggle
-            current={visualPreferences.ticketTypes}
-            options={[
-              { value: 'horizontalBar', label: 'Bar' },
-              { value: 'pie', label: 'Pie' },
-              { value: 'donut', label: 'Donut' }
-            ]}
-            onChange={handleVisualizationChange}
-            chartName="ticketTypes"
+        <div id="ticketTypes" className="mb-6">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-lg font-medium">Tickets by Type</h3>
+            <VisualizationToggle
+              current={visualPreferences.ticketTypes}
+              options={[
+                { value: 'horizontalBar', label: 'Bar' },
+                { value: 'pie', label: 'Pie' },
+                { value: 'donut', label: 'Donut' }
+              ]}
+              onChange={handleVisualizationChange}
+              chartName="ticketTypes"
+            />
+          </div>
+          <TicketTypesChart 
+            data={data} 
+            visualizationType={visualPreferences.ticketTypes as 'horizontalBar' | 'pie' | 'donut'}
           />
         </div>
-        <TicketTypesChart 
-          data={data} 
-          visualizationType={visualPreferences.ticketTypes}
-        />
-      </div>
+      </LayoutManagerWithGrid>
     </div>
   );
 }

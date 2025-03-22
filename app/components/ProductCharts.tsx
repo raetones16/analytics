@@ -11,12 +11,20 @@ import {
 } from './charts/products';
 import { VisualizationToggle } from './VisualizationToggle';
 import { saveVisualizationPreferences, loadVisualizationPreferences } from '../utils/storage/localStorage';
+import { LayoutManagerWithGrid } from './LayoutManagerWithGrid';
+import { EditLayoutButton } from './EditLayoutButton';
+import {
+  PRODUCT_CHARTS_LAYOUT_KEY, 
+  getDefaultProductChartsLayout 
+} from '../utils/storage/layoutStorage';
 
 interface ProductChartsProps {
   data: ProductUsageData[];
 }
 
 export function ProductCharts({ data }: ProductChartsProps) {
+  // State for edit mode
+  const [isEditingLayout, setIsEditingLayout] = useState(false);
   // State for visualization preferences
   const [visualPreferences, setVisualPreferences] = useState({
     userLogins: 'line',
@@ -86,9 +94,40 @@ export function ProductCharts({ data }: ProductChartsProps) {
     );
   }
 
+  // Function to toggle edit mode
+  const toggleEditMode = () => {
+    // If currently editing another section, don't allow switching to edit mode
+    const otherSectionEditing = document.querySelector('[data-edit-active="true"]');
+    if (otherSectionEditing && !isEditingLayout) {
+      alert('Please save or cancel editing in the other section first.');
+      return;
+    }
+    
+    setIsEditingLayout(!isEditingLayout);
+  };
+
+  // Function to handle save
+  const handleSaveLayout = () => {
+    setIsEditingLayout(false);
+  };
+
+  // Function to handle cancel
+  const handleCancelLayout = () => {
+    setIsEditingLayout(false);
+  };
+
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-      <h2 className="text-xl font-semibold mb-2">Product Usage</h2>
+    <div 
+      className="bg-white p-6 rounded-lg shadow-md mb-6"
+      data-edit-active={isEditingLayout ? "true" : "false"}
+    >
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">Product Usage</h2>
+        <EditLayoutButton 
+          isEditing={isEditingLayout} 
+          onClick={toggleEditMode} 
+        />
+      </div>
       
       <SyntheticDataIndicator 
         isVisible={hasSyntheticData || hasSyntheticDistribution}
@@ -98,9 +137,15 @@ export function ProductCharts({ data }: ProductChartsProps) {
         dataPoints={dataPoints}
       />
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+      <LayoutManagerWithGrid
+        storageKey={PRODUCT_CHARTS_LAYOUT_KEY}
+        defaultLayout={getDefaultProductChartsLayout()}
+        isEditing={isEditingLayout}
+        onSave={handleSaveLayout}
+        onCancel={handleCancelLayout}
+      >
         {/* User Logins Chart */}
-        <div>
+        <div id="userLogins">
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-lg font-medium">User Logins</h3>
             <VisualizationToggle
@@ -116,12 +161,12 @@ export function ProductCharts({ data }: ProductChartsProps) {
           </div>
           <UserLoginsChart 
             data={data} 
-            visualizationType={visualPreferences.userLogins} 
+            visualizationType={visualPreferences.userLogins as 'line' | 'bar' | 'area'} 
           />
         </div>
         
         {/* Absences Booked Chart */}
-        <div>
+        <div id="absencesBooked">
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-lg font-medium">Absences Booked</h3>
             <VisualizationToggle
@@ -137,12 +182,12 @@ export function ProductCharts({ data }: ProductChartsProps) {
           </div>
           <AbsencesBookedChart 
             data={data} 
-            visualizationType={visualPreferences.absencesBooked} 
+            visualizationType={visualPreferences.absencesBooked as 'bar' | 'line' | 'stacked'} 
           />
         </div>
         
         {/* Timesheets Submitted Chart */}
-        <div>
+        <div id="timesheetsSubmitted">
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-lg font-medium">Timesheets Submitted</h3>
             <VisualizationToggle
@@ -158,12 +203,12 @@ export function ProductCharts({ data }: ProductChartsProps) {
           </div>
           <TimesheetsSubmittedChart 
             data={data} 
-            visualizationType={visualPreferences.timesheetsSubmitted} 
+            visualizationType={visualPreferences.timesheetsSubmitted as 'line' | 'bar' | 'stacked'} 
           />
         </div>
         
         {/* Workflows Created Chart */}
-        <div>
+        <div id="workflowsCreated">
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-lg font-medium">Workflows Created</h3>
             <VisualizationToggle
@@ -179,10 +224,10 @@ export function ProductCharts({ data }: ProductChartsProps) {
           </div>
           <WorkflowsCreatedChart 
             data={data} 
-            visualizationType={visualPreferences.workflowsCreated} 
+            visualizationType={visualPreferences.workflowsCreated as 'bar' | 'line' | 'area'} 
           />
         </div>
-      </div>
+      </LayoutManagerWithGrid>
     </div>
   );
 }

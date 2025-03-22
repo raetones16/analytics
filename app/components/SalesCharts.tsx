@@ -13,12 +13,20 @@ import {
 } from './charts/sales';
 import { VisualizationToggle } from './VisualizationToggle';
 import { saveVisualizationPreferences, loadVisualizationPreferences } from '../utils/storage/localStorage';
+import { LayoutManagerWithGrid } from './LayoutManagerWithGrid';
+import { EditLayoutButton } from './EditLayoutButton';
+import {
+  SALES_CHARTS_LAYOUT_KEY, 
+  getDefaultSalesChartsLayout 
+} from '../utils/storage/layoutStorage';
 
 interface SalesChartsProps {
   data: SalesData[];
 }
 
 export function SalesCharts({ data }: SalesChartsProps) {
+  // State for edit mode
+  const [isEditingLayout, setIsEditingLayout] = useState(false);
   // State for visualization preferences
   const [visualPreferences, setVisualPreferences] = useState({
     salesByCategory: 'pie',
@@ -105,9 +113,40 @@ export function SalesCharts({ data }: SalesChartsProps) {
     );
   }
 
+  // Function to toggle edit mode
+  const toggleEditMode = () => {
+    // If currently editing another section, don't allow switching to edit mode
+    const otherSectionEditing = document.querySelector('[data-edit-active="true"]');
+    if (otherSectionEditing && !isEditingLayout) {
+      alert('Please save or cancel editing in the other section first.');
+      return;
+    }
+    
+    setIsEditingLayout(!isEditingLayout);
+  };
+
+  // Function to handle save
+  const handleSaveLayout = () => {
+    setIsEditingLayout(false);
+  };
+
+  // Function to handle cancel
+  const handleCancelLayout = () => {
+    setIsEditingLayout(false);
+  };
+
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-      <h2 className="text-xl font-semibold mb-2">Sales Statistics</h2>
+    <div 
+      className="bg-white p-6 rounded-lg shadow-md mb-6"
+      data-edit-active={isEditingLayout ? "true" : "false"}
+    >
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">Sales Statistics</h2>
+        <EditLayoutButton 
+          isEditing={isEditingLayout} 
+          onClick={toggleEditMode} 
+        />
+      </div>
       
       <SyntheticDataIndicator 
         isVisible={hasSyntheticData}
@@ -116,9 +155,15 @@ export function SalesCharts({ data }: SalesChartsProps) {
         type="full"
       />
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+      <LayoutManagerWithGrid
+        storageKey={SALES_CHARTS_LAYOUT_KEY}
+        defaultLayout={getDefaultSalesChartsLayout()}
+        isEditing={isEditingLayout}
+        onSave={handleSaveLayout}
+        onCancel={handleCancelLayout}
+      >
         {/* Sales by Category Chart */}
-        <div>
+        <div id="salesByCategory">
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-lg font-medium">Sales by Category</h3>
             <VisualizationToggle
@@ -134,12 +179,12 @@ export function SalesCharts({ data }: SalesChartsProps) {
           </div>
           <SalesByCategoryChart 
             data={enhancedData} 
-            visualizationType={visualPreferences.salesByCategory}
+            visualizationType={visualPreferences.salesByCategory as 'pie' | 'bar' | 'donut'}
           />
         </div>
         
         {/* Average Order Value Chart */}
-        <div>
+        <div id="averageOrderValue">
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-lg font-medium">Average Order Value</h3>
             <VisualizationToggle
@@ -155,12 +200,12 @@ export function SalesCharts({ data }: SalesChartsProps) {
           </div>
           <AverageOrderValueChart 
             data={enhancedData} 
-            visualizationType={visualPreferences.averageOrderValue}
+            visualizationType={visualPreferences.averageOrderValue as 'line' | 'bar' | 'area'}
           />
         </div>
         
         {/* ARR Growth Chart */}
-        <div>
+        <div id="arrGrowth">
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-lg font-medium">ARR Growth</h3>
             <VisualizationToggle
@@ -176,12 +221,12 @@ export function SalesCharts({ data }: SalesChartsProps) {
           </div>
           <ARRGrowthChart 
             data={enhancedData} 
-            visualizationType={visualPreferences.arrGrowth}
+            visualizationType={visualPreferences.arrGrowth as 'line' | 'bar' | 'area'}
           />
         </div>
         
         {/* License Types Distribution Chart */}
-        <div>
+        <div id="licenseTypes">
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-lg font-medium">License Types</h3>
             <VisualizationToggle
@@ -197,12 +242,12 @@ export function SalesCharts({ data }: SalesChartsProps) {
           </div>
           <LicenseTypesChart 
             data={enhancedData} 
-            visualizationType={visualPreferences.licenseTypes}
+            visualizationType={visualPreferences.licenseTypes as 'pie' | 'bar' | 'donut'}
           />
         </div>
         
         {/* Sales Count by Category Chart */}
-        <div>
+        <div id="salesCount">
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-lg font-medium">Sales Count</h3>
             <VisualizationToggle
@@ -218,12 +263,12 @@ export function SalesCharts({ data }: SalesChartsProps) {
           </div>
           <SalesCountChart 
             data={enhancedData} 
-            visualizationType={visualPreferences.salesCount}
+            visualizationType={visualPreferences.salesCount as 'bar' | 'line' | 'stacked'}
           />
         </div>
         
         {/* Total Monthly Sales Value Chart */}
-        <div>
+        <div id="totalSalesValue">
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-lg font-medium">Total Sales Value</h3>
             <VisualizationToggle
@@ -239,10 +284,10 @@ export function SalesCharts({ data }: SalesChartsProps) {
           </div>
           <TotalSalesValueChart 
             data={enhancedData} 
-            visualizationType={visualPreferences.totalSalesValue}
+            visualizationType={visualPreferences.totalSalesValue as 'line' | 'bar' | 'area'}
           />
         </div>
-      </div>
+      </LayoutManagerWithGrid>
     </div>
   );
 }
