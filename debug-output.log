@@ -1,0 +1,12 @@
+ ⚠ You are using a non-standard "NODE_ENV" value in your environment. This creates inconsistencies in the project and is strongly advised against. Read more: https://nextjs.org/docs/messages/non-standard-node-env
+Error: ENOENT: no such file or directory, open '/Users/tim.prudames/analytics/.next/BUILD_ID'
+    at async open (node:internal/fs/promises:639:25)
+    at async Object.readFile (node:internal/fs/promises:1242:14)
+    at async setupFsCheck (/Users/tim.prudames/analytics/node_modules/next/dist/server/lib/router-utils/filesystem.js:142:19)
+    at async initialize (/Users/tim.prudames/analytics/node_modules/next/dist/server/lib/router-server.js:56:23)
+    at async Server.<anonymous> (/Users/tim.prudames/analytics/node_modules/next/dist/server/lib/start-server.js:221:36) {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/tim.prudames/analytics/.next/BUILD_ID'
+}

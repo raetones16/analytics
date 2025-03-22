@@ -1,0 +1,47 @@
+{
+  "name": "analytics-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next build && next start",
+    "lint": "next lint",
+    "setup": "node scripts/setup-data-dirs.js",
+    "generate-data": "node scripts/generate-sample-data.js",
+    "check-files": "node scripts/check-files.js",
+    "test-api": "node scripts/test-api.js",
+    "debug-api": "node scripts/debug-api.js",
+    "start:debug": "next build && NODE_ENV=production next start -p 3000 2>&1 | tee debug-output.log"
+  },
+  "dependencies": {
+    "next": "^13.4.19",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "recharts": "^2.7.2",
+    "papaparse": "^5.4.1",
+    "xlsx": "^0.18.5",
+    "@radix-ui/react-dialog": "^1.0.4",
+    "@radix-ui/react-dropdown-menu": "^2.0.5",
+    "@radix-ui/react-navigation-menu": "^1.1.3",
+    "@radix-ui/react-select": "^1.2.2",
+    "@radix-ui/react-slot": "^1.0.2",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.0.0",
+    "lucide-react": "^0.263.1",
+    "tailwind-merge": "^1.14.0",
+    "tailwindcss-animate": "^1.0.6"
+  },
+  "devDependencies": {
+    "@types/node": "^20.5.0",
+    "@types/papaparse": "^5.3.7",
+    "@types/react": "^18.2.20",
+    "@types/react-dom": "^18.2.7",
+    "autoprefixer": "^10.4.15",
+    "eslint": "^8.47.0",
+    "eslint-config-next": "^13.4.19",
+    "postcss": "^8.4.28",
+    "tailwindcss": "^3.3.3",
+    "typescript": "^5.1.6"
+  }
+}
