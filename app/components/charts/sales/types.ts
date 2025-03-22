@@ -2,7 +2,7 @@
 
 export interface SalesData {
   date: string;
-  // New Channel__c based metrics
+  // Channel__c based metrics
   newDirectSalesCount?: number;
   newDirectSalesValue?: number;
   newPartnerSalesCount?: number;
@@ -13,23 +13,6 @@ export interface SalesData {
   existingPartnerClientValue?: number;
   selfServiceCount?: number;
   selfServiceValue?: number;
-  // Legacy sales type metrics (kept for compatibility)
-  existingClientCount?: number;
-  existingClientAverageOrderValue?: number;
-  existingClientAverageModulesPerClient?: number;
-  existingClientARPA?: number;
-  selfServiceAverageOrderValue?: number;
-  selfServiceAverageModulesPerClient?: number;
-  selfServiceARPA?: number;
-  newProspectCount?: number;
-  newProspectAverageOrderValue?: number;
-  newProspectAverageModulesPerClient?: number;
-  newProspectARPA?: number;
-  // Legacy sales channel metrics (kept for compatibility)
-  directSalesCount?: number;
-  directSalesValue?: number;
-  partnerSalesCount?: number;
-  partnerSalesValue?: number;
   // License type metrics
   userLicensesCount?: number;
   leaverLicensesCount?: number;

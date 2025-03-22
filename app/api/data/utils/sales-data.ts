@@ -17,23 +17,6 @@ interface SalesDataPoint {
   existingPartnerClientValue: number;
   selfServiceCount: number;
   selfServiceValue: number;
-  // Legacy metrics (kept for compatibility)
-  existingClientCount: number;
-  existingClientAverageOrderValue: number;
-  existingClientAverageModulesPerClient: number;
-  existingClientARPA: number;
-  selfServiceAverageOrderValue: number;
-  selfServiceAverageModulesPerClient: number;
-  selfServiceARPA: number;
-  newProspectCount: number;
-  newProspectAverageOrderValue: number;
-  newProspectAverageModulesPerClient: number;
-  newProspectARPA: number;
-  // Legacy sales channel metrics (kept for compatibility)
-  directSalesCount: number;
-  directSalesValue: number;
-  partnerSalesCount: number;
-  partnerSalesValue: number;
   // License type metrics
   userLicensesCount: number;
   leaverLicensesCount: number;
@@ -280,14 +263,6 @@ export async function processSalesData(): Promise<SalesDataPoint[]> {
       let selfServiceCount = 0;
       let unknownCategoryCount = 0;
       
-      // Legacy counters (for compatibility)
-      let selfServiceTypeCount = 0;
-      let existingClientTypeCount = 0;
-      let newProspectTypeCount = 0;
-      let otherTypeCount = 0;
-      let directSalesCount = 0;
-      let partnerSalesCount = 0;
-      
       salesforceData.forEach((item, index) => {
         try {
           if (!item[dateColumn]) {
@@ -306,21 +281,13 @@ export async function processSalesData(): Promise<SalesDataPoint[]> {
           
           if (!dataByMonth.has(monthKey)) {
             dataByMonth.set(monthKey, {
-              // New categories based on Channel__c
+              // Categories
               newDirect: [],
               newPartner: [],
               existingClient: [],
               existingPartner: [],
               selfService: [],
               unknown: [],
-              
-              // Legacy categories (kept for backward compatibility)
-              selfServiceType: [],
-              existingClientType: [],
-              newProspectType: [],
-              otherType: [],
-              directSales: [],
-              partnerSales: [],
               
               // License types
               licenseTypes: {
@@ -366,48 +333,6 @@ export async function processSalesData(): Promise<SalesDataPoint[]> {
               unknownCategoryCount++;
           }
           
-          // LEGACY: Add to type-based categories for backward compatibility
-          if (!typeColumn) {
-            dataByMonth.get(monthKey).otherType.push({ amount, modules });
-            otherTypeCount++;
-          } else {
-            const typeValue = String(item[typeColumn] || '').toLowerCase();
-            
-            if (typeValue.includes('self-service') || typeValue.includes('self service')) {
-              dataByMonth.get(monthKey).selfServiceType.push({ amount, modules });
-              selfServiceTypeCount++;
-            } else if (typeValue.startsWith('existing client') || 
-                      typeValue.includes('existing client') ||
-                      typeValue.startsWith('existing client -') ||
-                      typeValue.includes('more users') ||
-                      typeValue.includes('training') ||
-                      typeValue.includes('sso') ||
-                      typeValue.includes('country expansion') ||
-                      typeValue.includes('upsell') ||
-                      typeValue.includes('chargeable support') ||
-                      typeValue.includes('new entity') ||
-                      typeValue.includes('dca') ||
-                      (typeValue.includes('time tracking') && !typeValue.includes('new prospect'))) {
-              dataByMonth.get(monthKey).existingClientType.push({ amount, modules });
-              existingClientTypeCount++;
-            } else if (typeValue.includes('new prospect')) {
-              dataByMonth.get(monthKey).newProspectType.push({ amount, modules });
-              newProspectTypeCount++;
-            } else {
-              dataByMonth.get(monthKey).otherType.push({ amount, modules });
-              otherTypeCount++;
-            }
-          }
-          
-          // LEGACY: Add to sales channel category
-          if (channelColumn && String(item[channelColumn] || '').toLowerCase().includes('partner')) {
-            dataByMonth.get(monthKey).partnerSales.push({ amount, modules });
-            partnerSalesCount++;
-          } else {
-            dataByMonth.get(monthKey).directSales.push({ amount, modules });
-            directSalesCount++;
-          }
-          
           // Count license types
           const licenseTypes = getLicenseTypes(item);
           const monthData = dataByMonth.get(monthKey);
@@ -430,10 +355,6 @@ export async function processSalesData(): Promise<SalesDataPoint[]> {
       
       // Log sales breakdown
       log(LOG_LEVEL.INFO, `Channel-based Sales breakdown - New Direct: ${newDirectCount}, New Partner: ${newPartnerCount}, Existing Client: ${existingClientCount}, Existing Partner: ${existingPartnerCount}, Self-service: ${selfServiceCount}, Unknown: ${unknownCategoryCount}`);
-      
-      // Log legacy counters for comparison
-      log(LOG_LEVEL.INFO, `Legacy Type-based breakdown - Self-service: ${selfServiceTypeCount}, Existing client: ${existingClientTypeCount}, New prospect: ${newProspectTypeCount}, Other: ${otherTypeCount}`);
-      log(LOG_LEVEL.INFO, `Legacy Channel - Direct: ${directSalesCount}, Partner: ${partnerSalesCount}`);
 
       // Calculate metrics for each month
       const processedData: SalesDataPoint[] = [];
@@ -443,50 +364,19 @@ export async function processSalesData(): Promise<SalesDataPoint[]> {
         .sort(([a], [b]) => a.localeCompare(b))
         .forEach(([month, data]) => {
           const { 
-            // New categories
+            // Categories
             newDirect, newPartner, existingClient, existingPartner, selfService, unknown,
-            // Legacy categories
-            selfServiceType, existingClientType, newProspectType, otherType, directSales, partnerSales,
             // License types
             licenseTypes 
           } = data;
           
-          // Calculate metrics for new categories
+          // Calculate metrics for each category
           const newDirectTotalValue = newDirect.reduce((sum: number, deal: { amount: number; modules: number }) => sum + deal.amount, 0);
           const newPartnerTotalValue = newPartner.reduce((sum: number, deal: { amount: number; modules: number }) => sum + deal.amount, 0);
           const existingClientTotalValue = existingClient.reduce((sum: number, deal: { amount: number; modules: number }) => sum + deal.amount, 0);
           const existingPartnerTotalValue = existingPartner.reduce((sum: number, deal: { amount: number; modules: number }) => sum + deal.amount, 0);
           const selfServiceTotalValue = selfService.reduce((sum: number, deal: { amount: number; modules: number }) => sum + deal.amount, 0);
           const unknownTotalValue = unknown.reduce((sum: number, deal: { amount: number; modules: number }) => sum + deal.amount, 0);
-          
-          // Calculate legacy metrics
-          // Calculate existing client type metrics
-          const existingClientTypeAvgOrderValue = existingClientType.length > 0 
-            ? existingClientType.reduce((sum: number, deal: { amount: number; }) => sum + deal.amount, 0) / existingClientType.length 
-            : 0;
-          
-          const existingClientTypeTotalModules = existingClientType.reduce((sum: number, deal: { amount: number; modules: number }) => sum + deal.modules, 0);
-          const existingClientTypeAvgModules = existingClientType.length > 0 ? existingClientTypeTotalModules / existingClientType.length : 0;
-          
-          // Calculate self-service type metrics
-          const selfServiceTypeAvgOrderValue = selfServiceType.length > 0 
-            ? selfServiceType.reduce((sum: number, deal: { amount: number; }) => sum + deal.amount, 0) / selfServiceType.length
-            : 0;
-          
-          const selfServiceTypeTotalModules = selfServiceType.reduce((sum: number, deal: { amount: number; modules: number }) => sum + deal.modules, 0);
-          const selfServiceTypeAvgModules = selfServiceType.length > 0 ? selfServiceTypeTotalModules / selfServiceType.length : 0;
-          
-          // Calculate new prospect type metrics
-          const newProspectTypeAvgOrderValue = newProspectType.length > 0 
-            ? newProspectType.reduce((sum: number, deal: { amount: number; }) => sum + deal.amount, 0) / newProspectType.length
-            : 0;
-          
-          const newProspectTypeTotalModules = newProspectType.reduce((sum: number, deal: { amount: number; modules: number }) => sum + (deal.modules || 0), 0);
-          const newProspectTypeAvgModules = newProspectType.length > 0 ? newProspectTypeTotalModules / newProspectType.length : 0;
-          
-          // Calculate legacy sales channel metrics
-          const directSalesTotalValue = directSales.reduce((sum: number, deal: { amount: number; modules: number }) => sum + deal.amount, 0);
-          const partnerSalesTotalValue = partnerSales.reduce((sum: number, deal: { amount: number; modules: number }) => sum + deal.amount, 0);
           
           // Calculate combined metrics
           const totalValue = newDirectTotalValue + newPartnerTotalValue + existingClientTotalValue + 
@@ -531,29 +421,6 @@ export async function processSalesData(): Promise<SalesDataPoint[]> {
             existingPartnerClientValue: existingPartnerTotalValue,
             selfServiceCount: selfService.length,
             selfServiceValue: selfServiceTotalValue,
-            
-            // Legacy existing client type metrics (kept for compatibility)
-            existingClientCount: existingClientType.length,
-            existingClientAverageOrderValue: existingClientTypeAvgOrderValue,
-            existingClientAverageModulesPerClient: existingClientTypeAvgModules,
-            existingClientARPA: existingClientTypeAvgOrderValue, // Same as avgOrderValue
-            
-            // Legacy self-service type metrics (kept for compatibility)
-            selfServiceAverageOrderValue: selfServiceTypeAvgOrderValue,
-            selfServiceAverageModulesPerClient: selfServiceTypeAvgModules,
-            selfServiceARPA: selfServiceTypeAvgOrderValue, // Same as avgOrderValue
-            
-            // Legacy new prospect type metrics (kept for compatibility)
-            newProspectCount: newProspectType.length,
-            newProspectAverageOrderValue: newProspectTypeAvgOrderValue,
-            newProspectAverageModulesPerClient: newProspectTypeAvgModules,
-            newProspectARPA: newProspectTypeAvgOrderValue, // Same as avgOrderValue
-            
-            // Legacy sales channel metrics (kept for compatibility)
-            directSalesCount: directSales.length,
-            directSalesValue: directSalesTotalValue,
-            partnerSalesCount: partnerSales.length,
-            partnerSalesValue: partnerSalesTotalValue,
             
             // License type metrics
             userLicensesCount: licenseTypes.userLicenses,

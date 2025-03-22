@@ -79,17 +79,6 @@ export function SalesCharts({ data }: SalesChartsProps) {
               ? (dataPoint.selfServiceValue / dataPoint.selfServiceCount)
               : 'N/A'
           });
-          
-          // Legacy logging for comparison
-          console.log('LEGACY - DIRECT SALES:', {
-            count: dataPoint.directSalesCount || 0,
-            totalValue: dataPoint.directSalesValue || 0
-          });
-          
-          console.log('LEGACY - PARTNER SALES:', {
-            count: dataPoint.partnerSalesCount || 0,
-            totalValue: dataPoint.partnerSalesValue || 0
-          });
         });
         
         console.log('##################################');
