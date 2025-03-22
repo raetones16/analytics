@@ -1,3 +1,5 @@
+"use client";
+
 import React from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ChartProps, COLORS, prepareSeverityData } from './types';

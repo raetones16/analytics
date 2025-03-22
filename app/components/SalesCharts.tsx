@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { SyntheticDataIndicator } from './SyntheticDataIndicator';
 import { 
   SalesByCategoryChart,
@@ -17,76 +17,6 @@ interface SalesChartsProps {
 export function SalesCharts({ data }: SalesChartsProps) {
   // Check if any data points have synthetic flags
   const hasSyntheticData = data.some(item => item._synthetic?.data);
-  
-  // Add more detailed logging for data changes
-  useEffect(() => {
-    console.log('##################################');
-    console.log('DATA CHANGE DETECTED - Length:', data?.length);
-    console.log('Current data points:', data?.map(d => d.date).join(', '));
-    console.log('##################################');
-  }, [data]);
-  
-  // For debugging specific data points
-  useEffect(() => {
-    // Only run once in development
-    if (process.env.NODE_ENV === 'development') {
-      if (data.length > 0) {
-        // Add highly distinctive markers that will definitely show in logs
-        console.log('##################################');
-        console.log('######## SALES DEBUG START #######');
-        console.log('##################################');
-        
-        data.forEach((dataPoint, index) => {
-          console.log(`DATA POINT ${index + 1} (${dataPoint.date}):`);
-          
-          // Log Channel__c based categories
-          console.log('NEW DIRECT SALES:', {
-            count: dataPoint.newDirectSalesCount || 0,
-            totalValue: dataPoint.newDirectSalesValue || 0,
-            calculatedAvg: dataPoint.newDirectSalesCount && dataPoint.newDirectSalesValue 
-              ? (dataPoint.newDirectSalesValue / dataPoint.newDirectSalesCount)
-              : 'N/A'
-          });
-          
-          console.log('NEW PARTNER SALES:', {
-            count: dataPoint.newPartnerSalesCount || 0,
-            totalValue: dataPoint.newPartnerSalesValue || 0,
-            calculatedAvg: dataPoint.newPartnerSalesCount && dataPoint.newPartnerSalesValue 
-              ? (dataPoint.newPartnerSalesValue / dataPoint.newPartnerSalesCount)
-              : 'N/A'
-          });
-          
-          console.log('EXISTING CLIENT UPSELL:', {
-            count: dataPoint.existingClientUpsellCount || 0,
-            totalValue: dataPoint.existingClientUpsellValue || 0,
-            calculatedAvg: dataPoint.existingClientUpsellCount && dataPoint.existingClientUpsellValue 
-              ? (dataPoint.existingClientUpsellValue / dataPoint.existingClientUpsellCount)
-              : 'N/A'
-          });
-          
-          console.log('EXISTING PARTNER CLIENT:', {
-            count: dataPoint.existingPartnerClientCount || 0,
-            totalValue: dataPoint.existingPartnerClientValue || 0,
-            calculatedAvg: dataPoint.existingPartnerClientCount && dataPoint.existingPartnerClientValue 
-              ? (dataPoint.existingPartnerClientValue / dataPoint.existingPartnerClientCount)
-              : 'N/A'
-          });
-          
-          console.log('SELF-SERVICE:', {
-            count: dataPoint.selfServiceCount || 0,
-            totalValue: dataPoint.selfServiceValue || 0,
-            calculatedAvg: dataPoint.selfServiceCount && dataPoint.selfServiceValue 
-              ? (dataPoint.selfServiceValue / dataPoint.selfServiceCount)
-              : 'N/A'
-          });
-        });
-        
-        console.log('##################################');
-        console.log('######### SALES DEBUG END ########');
-        console.log('##################################');
-      }
-    }
-  }, [data]);
   
   // Pre-calculate additional metrics for the charts
   const enhancedData = data.map(item => {
@@ -138,7 +68,7 @@ export function SalesCharts({ data }: SalesChartsProps) {
         type="full"
       />
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
         {/* Sales by Category Chart */}
         <div>
           <SalesByCategoryChart data={enhancedData} />

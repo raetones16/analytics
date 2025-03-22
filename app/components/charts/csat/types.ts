@@ -4,6 +4,7 @@ export interface CSATData {
   date: string;
   npsScore: number;
   churnPercentage: number;
+  totalTickets: number;
   supportTicketsBySeverity: {
     low: number;
     medium: number;
@@ -11,6 +12,12 @@ export interface CSATData {
     urgent: number;
   };
   supportTopics: {
+    [key: string]: number;
+  };
+  ticketTypes: {
+    [key: string]: number;
+  };
+  ticketsByGroup: {
     [key: string]: number;
   };
   _synthetic?: {

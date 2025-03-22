@@ -8,6 +8,7 @@ interface CSATDataPoint {
   date: string;
   npsScore: number;
   churnPercentage: number;
+  totalTickets: number; // Total tickets for the month
   supportTicketsBySeverity: {
     low: number;
     medium: number;
@@ -15,6 +16,8 @@ interface CSATDataPoint {
     urgent: number;
   };
   supportTopics: Record<string, number>;
+  ticketTypes: Record<string, number>; // Breakdown by ticket type
+  ticketsByGroup: Record<string, number>; // Breakdown by support group
   _synthetic?: {
     nps?: boolean;
     churn?: boolean;
@@ -49,10 +52,11 @@ export async function processCSATData(): Promise<CSATDataPoint[]> {
       const firstRow = supportData[0];
       const dateColumn = findColumn(firstRow, ['Created Date', 'CreatedDate', 'Created_at', 'created_at', 'Date']);
       const priorityColumn = findColumn(firstRow, ['Impact Level', 'Priority', 'priority', 'Severity']);
-      const topicColumn = findColumn(firstRow, ['Subject', 'Topic', 'topic', 'Category', 'category']);
+      const topicColumn = findColumn(firstRow, ['Help Topic', 'Subject', 'Topic', 'topic', 'Category', 'category']);
       const typeColumn = findColumn(firstRow, ['Ticket Type', 'Type', 'type']);
       
-      log(LOG_LEVEL.INFO, `Support columns - Date: ${dateColumn}, Priority: ${priorityColumn}, Topic: ${topicColumn}, Type: ${typeColumn}`);
+      const groupColumn = findColumn(firstRow, ['Group Name', 'Group']);
+      log(LOG_LEVEL.INFO, `Support columns - Date: ${dateColumn}, Priority: ${priorityColumn}, Topic: ${topicColumn}, Type: ${typeColumn}, Group: ${groupColumn}`);
       
       if (!dateColumn) {
         log(LOG_LEVEL.ERROR, "Missing date column in support data");
@@ -87,8 +91,9 @@ export async function processCSATData(): Promise<CSATDataPoint[]> {
           const priority = priorityColumn ? (ticket[priorityColumn] || 'Unknown') : 'Unknown';
           const topic = topicColumn ? (ticket[topicColumn] || 'Other') : 'Other';
           const type = typeColumn ? (ticket[typeColumn] || 'Other') : 'Other';
+          const group = groupColumn ? (ticket[groupColumn] || 'No Group') : 'No Group';
           
-          dataByMonth.get(monthKey).push({ priority, topic, type });
+          dataByMonth.get(monthKey).push({ priority, topic, type, group });
         } catch (error: unknown) {
           let errorMessage = 'Unknown error';
           if (error instanceof Error) {
@@ -102,6 +107,13 @@ export async function processCSATData(): Promise<CSATDataPoint[]> {
 
       // Calculate metrics for each month
       const processedData: CSATDataPoint[] = [];
+      
+      // Map to store ticket types
+      const getTicketType = (type: string | undefined): string => {
+        if (!type) return 'Other';
+        const t = String(type).trim();
+        return t || 'Other';
+      };
       
       // Helper for categorizing priorities
       const getPriorityCategory = (priority: string | number | undefined): 'low' | 'medium' | 'high' | 'urgent' => {
@@ -144,6 +156,20 @@ export async function processCSATData(): Promise<CSATDataPoint[]> {
             topicsMap[topic] = (topicsMap[topic] || 0) + 1;
           });
           
+          // Count tickets by type
+          const ticketTypesMap: Record<string, number> = {};
+          tickets.forEach((ticket: { type?: string }) => {
+            const type = getTicketType(ticket.type);
+            ticketTypesMap[type] = (ticketTypesMap[type] || 0) + 1;
+          });
+          
+          // Count tickets by group
+          const ticketsByGroupMap: Record<string, number> = {};
+          tickets.forEach((ticket: { group?: string }) => {
+            const group = ticket.group || 'No Group';
+            ticketsByGroupMap[group] = (ticketsByGroupMap[group] || 0) + 1;
+          });
+          
           // Ensure we have a reasonable number of topics (merge smaller ones)
           const minTopicCount = Math.max(1, Math.floor(ticketsCount * 0.05));
           const mergedTopics: Record<string, number> = {};
@@ -160,8 +186,11 @@ export async function processCSATData(): Promise<CSATDataPoint[]> {
             date: month,
             npsScore: npsScore,
             churnPercentage: churnPercentage,
+            totalTickets: tickets.length,
             supportTicketsBySeverity: ticketsBySeverity,
             supportTopics: Object.keys(mergedTopics).length > 0 ? mergedTopics : {"Other": 1},
+            ticketTypes: Object.keys(ticketTypesMap).length > 0 ? ticketTypesMap : {"Other": 1},
+            ticketsByGroup: Object.keys(ticketsByGroupMap).length > 0 ? ticketsByGroupMap : {"Other": 1},
             _synthetic: {
               nps: isNpsSynthetic,
               churn: isChurnSynthetic,
@@ -206,6 +235,7 @@ function createSyntheticCSATData(): CSATDataPoint[] {
       date: formatDateISO(date),
       npsScore: baseNps + i * 0.3,
       churnPercentage: Math.max(1.0, baseChurn - i * 0.4),
+      totalTickets: 320 - i * 15, // Total tickets decreasing over time (improvement)
       supportTicketsBySeverity: {
         low: 140 + i * 10,
         medium: 85 - i * 5,
@@ -219,6 +249,19 @@ function createSyntheticCSATData(): CSATDataPoint[] {
         'Integration': 28 + i * 2,
         'Workflows': 20 + i * 4,
         'Others': 100 - i * 2
+      },
+      ticketTypes: {
+        'Question': 110 - i * 5,
+        'Problem': 90 - i * 3,
+        'Feature Request': 65 + i * 2,
+        'Refund': 30 - i * 1,
+        'Other': 25 - i * 1
+      },
+      ticketsByGroup: {
+        'Support Team': 180 - i * 8,
+        'Technical Team': 90 + i * 2,
+        'Implementation': 50 - i * 2,
+        'No Group': 0
       },
       _isSynthetic: true // Flag to indicate synthetic data
     };

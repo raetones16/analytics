@@ -5,6 +5,7 @@ import { DateFilter } from './components/DateFilter';
 import { ProductCharts } from './components/ProductCharts';
 import { SalesCharts } from './components/SalesCharts';
 import { CSATCharts } from './components/CSATCharts';
+import { RevisedCSATCharts } from './components/RevisedCSATCharts';
 
 // Define types for our data
 interface ProductUsageData {
@@ -36,6 +37,7 @@ interface CSATData {
   date: string;
   npsScore: number;
   churnPercentage: number;
+  totalTickets: number;
   supportTicketsBySeverity: {
     low: number;
     medium: number;
@@ -43,6 +45,12 @@ interface CSATData {
     urgent: number;
   };
   supportTopics: {
+    [key: string]: number;
+  };
+  ticketTypes: {
+    [key: string]: number;
+  };
+  ticketsByGroup?: {
     [key: string]: number;
   };
   _synthetic?: {
@@ -150,6 +158,7 @@ const mockCSATData: CSATData[] = [
     date: '2025-01-01',
     npsScore: 7.8,
     churnPercentage: 2.3,
+    totalTickets: 276,
     supportTicketsBySeverity: {
       low: 145,
       medium: 87,
@@ -163,12 +172,19 @@ const mockCSATData: CSATData[] = [
       'Integrations': 30,
       'Workflows': 24,
       'Others': 107
+    },
+    ticketTypes: {
+      'Question': 120,
+      'Problem': 85,
+      'Feature Request': 45,
+      'Other': 26
     }
   },
   {
     date: '2025-02-01',
     npsScore: 8.1,
     churnPercentage: 2.1,
+    totalTickets: 283,
     supportTicketsBySeverity: {
       low: 152,
       medium: 93,
@@ -182,12 +198,19 @@ const mockCSATData: CSATData[] = [
       'Integrations': 36,
       'Workflows': 29,
       'Others': 106
+    },
+    ticketTypes: {
+      'Question': 115,
+      'Problem': 90,
+      'Feature Request': 50,
+      'Other': 28
     }
   },
   {
     date: '2025-03-01',
     npsScore: 8.3,
     churnPercentage: 1.9,
+    totalTickets: 282,
     supportTicketsBySeverity: {
       low: 163,
       medium: 86,
@@ -201,12 +224,18 @@ const mockCSATData: CSATData[] = [
       'Integrations': 38,
       'Workflows': 32,
       'Others': 103
+    },
+    ticketTypes: {
+      'Question': 105,
+      'Problem': 85,
+      'Feature Request': 60,
+      'Other': 32
     }
   }
 ];
 
 export default function Dashboard() {
-  const [dateRange, setDateRange] = useState<DateRangeType>('month');
+  const [dateRange, setDateRange] = useState<DateRangeType>('quarter');
   const [productData, setProductData] = useState<ProductUsageData[]>([]);
   const [salesData, setSalesData] = useState<SalesData[]>([]);
   const [csatData, setCSATData] = useState<CSATData[]>([]);
@@ -287,7 +316,7 @@ export default function Dashboard() {
   }, [dateRange]);
 
   return (
-    <div className="container mx-auto px-4">
+    <div className="container 2xl:max-w-[1800px] mx-auto px-4">
       <header className="py-6">
         <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
         <p className="text-gray-600">View key business metrics at a glance</p>
@@ -328,9 +357,13 @@ export default function Dashboard() {
         </div>
       ) : (
         <>
-          <ProductCharts data={productData} />
-          <SalesCharts data={salesData} />
-          <CSATCharts data={csatData} />
+          <div className="mb-12">
+            <ProductCharts data={productData} />
+          </div>
+          <div className="mb-12">
+            <SalesCharts data={salesData} />
+          </div>
+          <RevisedCSATCharts data={csatData} dateRange={dateRange} />
         </>
       )}
     </div>

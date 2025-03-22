@@ -1,11 +1,13 @@
+"use client";
+
 import React from 'react';
 import { SummaryProps } from './types';
 
 const SummaryStats: React.FC<SummaryProps> = ({ data }) => {
   if (!data) return null;
   
-  // Calculate total tickets
-  const totalTickets = Object.values(data.supportTicketsBySeverity).reduce((a, b) => a + b, 0);
+  // Get total tickets directly from the data
+  const totalTickets = data.totalTickets;
   
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 mb-6">

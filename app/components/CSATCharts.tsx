@@ -1,3 +1,5 @@
+"use client";
+
 import React from 'react';
 import { SyntheticDataIndicator } from './SyntheticDataIndicator';
 import {
@@ -6,6 +8,9 @@ import {
   TicketsBySeverityChart,
   TopSupportTopicsChart,
   ChurnRateChart,
+  MonthlyTicketsChart,
+  TicketTypesPieChart,
+  TicketsByGroupChart,
   CSATData
 } from './charts/csat';
 
@@ -69,9 +74,9 @@ export function CSATCharts({ data }: CSATChartsProps) {
       {latestData && <SummaryStats data={latestData} />}
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* NPS Score Chart */}
+        {/* Monthly Tickets Chart */}
         <div>
-          <NPSScoreChart data={data} />
+          <MonthlyTicketsChart data={data} />
         </div>
         
         {/* Tickets by Severity Pie Chart */}
@@ -82,6 +87,21 @@ export function CSATCharts({ data }: CSATChartsProps) {
         {/* Main Support Topics */}
         <div>
           <TopSupportTopicsChart data={data} />
+        </div>
+        
+        {/* Ticket Types Pie Chart */}
+        <div>
+          <TicketTypesPieChart data={data} />
+        </div>
+        
+        {/* Tickets by Group Chart */}
+        <div>
+          <TicketsByGroupChart data={data} />
+        </div>
+        
+        {/* NPS Score Chart */}
+        <div>
+          <NPSScoreChart data={data} />
         </div>
         
         {/* Churn Rate Trend */}

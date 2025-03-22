@@ -40,6 +40,10 @@ export interface SalesData {
   selfServiceAvg?: number;
 }
 
+// Category key type
+export type CategoryKey = 'newDirect' | 'newPartner' | 'existingClient' | 'existingPartner' | 'selfService';
+
+// Basic chart props
 export interface ChartProps {
   data: SalesData[];
 }
@@ -51,6 +55,15 @@ export const categoryColors = {
   existingClient: "#ffc658", // Yellow
   existingPartner: "#8B008B", // Dark Purple
   selfService: "#ff8042"     // Orange
+};
+
+// Category display names
+export const categoryDisplayNames: Record<CategoryKey, string> = {
+  newDirect: 'New Direct',
+  newPartner: 'New Partner',
+  existingClient: 'Existing Client',
+  existingPartner: 'Existing Partner',
+  selfService: 'Self-Service'
 };
 
 // Common formatting functions

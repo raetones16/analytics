@@ -1,84 +1,141 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { ChartProps, categoryColors, formatLargeNumber } from './types';
+import { ChartProps, categoryColors, formatLargeNumber, CategoryKey } from './types';
 import { CustomAvgTooltip } from './tooltips';
 
 const AverageOrderValueChart: React.FC<ChartProps> = ({ data }) => {
   if (data.length === 0) return null;
   
-  // Calculate average values for each category if not already present
-  const enhancedData = data.map(item => {
-    const newData = { ...item };
-    
-    // Only calculate if not already present
-    if (newData.newDirectAvg === undefined) {
-      newData.newDirectAvg = newData.newDirectSalesCount && newData.newDirectSalesValue 
-        ? newData.newDirectSalesValue / newData.newDirectSalesCount : 0;
+  // Local state to track which category is active
+  // null means all categories are shown
+  const [activeCategory, setActiveCategory] = useState<CategoryKey | null>(null);
+  
+  // Category configuration with dynamic visibility
+  const categories = [
+    { 
+      dataKey: "newDirectAvg", 
+      name: "New Direct", 
+      fill: categoryColors.newDirect,
+      categoryKey: 'newDirect' as CategoryKey
+    },
+    { 
+      dataKey: "newPartnerAvg", 
+      name: "New Partner", 
+      fill: categoryColors.newPartner,
+      categoryKey: 'newPartner' as CategoryKey
+    },
+    { 
+      dataKey: "existingClientAvg", 
+      name: "Existing Client", 
+      fill: categoryColors.existingClient,
+      categoryKey: 'existingClient' as CategoryKey
+    },
+    { 
+      dataKey: "existingPartnerAvg", 
+      name: "Existing Partner", 
+      fill: categoryColors.existingPartner,
+      categoryKey: 'existingPartner' as CategoryKey
+    },
+    { 
+      dataKey: "selfServiceAvg", 
+      name: "Self-Service", 
+      fill: categoryColors.selfService,
+      categoryKey: 'selfService' as CategoryKey
     }
-    
-    if (newData.newPartnerAvg === undefined) {
-      newData.newPartnerAvg = newData.newPartnerSalesCount && newData.newPartnerSalesValue 
-        ? newData.newPartnerSalesValue / newData.newPartnerSalesCount : 0;
+  ];
+  
+  // Handle legend item click
+  const handleLegendClick = (categoryKey: CategoryKey) => {
+    // If clicking the already active category, reset to show all
+    if (activeCategory === categoryKey) {
+      setActiveCategory(null);
+    } else {
+      // Otherwise, set the clicked category as active
+      setActiveCategory(categoryKey);
     }
-    
-    if (newData.existingClientAvg === undefined) {
-      newData.existingClientAvg = newData.existingClientUpsellCount && newData.existingClientUpsellValue 
-        ? newData.existingClientUpsellValue / newData.existingClientUpsellCount : 0;
+  };
+  
+  // Determine which categories to show
+  const getVisibleCategories = () => {
+    if (activeCategory === null) {
+      // If no active category, show all
+      return categories;
+    } else {
+      // Otherwise, only show the active category
+      return categories.filter(cat => cat.categoryKey === activeCategory);
     }
-    
-    if (newData.existingPartnerAvg === undefined) {
-      newData.existingPartnerAvg = newData.existingPartnerClientCount && newData.existingPartnerClientValue 
-        ? newData.existingPartnerClientValue / newData.existingPartnerClientCount : 0;
-    }
-    
-    if (newData.selfServiceAvg === undefined) {
-      newData.selfServiceAvg = newData.selfServiceCount && newData.selfServiceValue 
-        ? newData.selfServiceValue / newData.selfServiceCount : 0;
-    }
-    
-    return newData;
-  });
+  };
+  
+  const visibleCategories = getVisibleCategories();
+  
+  // Custom Legend component that handles clicks
+  const CustomLegend = ({ payload }: any) => {
+    return (
+      <ul className="recharts-default-legend" style={{ padding: 0, margin: 0, textAlign: 'center' }}>
+        {categories.map((category, index) => {
+          const isActive = activeCategory === null || activeCategory === category.categoryKey;
+          
+          return (
+            <li 
+              key={`item-${index}`}
+              className="recharts-legend-item"
+              style={{ 
+                display: 'inline-block', 
+                marginRight: 10,
+                cursor: 'pointer',
+                opacity: isActive ? 1 : 0.5
+              }}
+              onClick={() => handleLegendClick(category.categoryKey)}
+            >
+              <svg 
+                className="recharts-surface" 
+                width="14" 
+                height="14" 
+                viewBox="0 0 14 14" 
+                style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: 4 }}
+              >
+                <path 
+                  fill={category.fill} 
+                  d="M0,0h14v14h-14z" 
+                  className="recharts-legend-icon"
+                />
+              </svg>
+              <span style={{ color: isActive ? '#666' : '#999' }}>{category.name}</span>
+            </li>
+          );
+        })}
+      </ul>
+    );
+  };
+  
+  // Add a help text for clarity
+  const helpText = (
+    <p className="text-xs text-gray-500 mt-1 mb-2 text-center">
+      Click a legend item to focus on that category. Click again to show all categories.
+    </p>
+  );
   
   return (
     <div>
-      <h3 className="text-lg font-medium mb-3">Average Order Value by Category</h3>
+      <h3 className="text-lg font-medium mb-1">Average Order Value by Category</h3>
+      {helpText}
       <ResponsiveContainer width="100%" height={300}>
-        {data.length === 1 ? (
-          // If we have only one data point, still use multiple bars with consistent colors
-          <BarChart data={[{
-            date: enhancedData[0].date,
-            newDirectAvg: enhancedData[0].newDirectAvg || 0,
-            newPartnerAvg: enhancedData[0].newPartnerAvg || 0,
-            existingClientAvg: enhancedData[0].existingClientAvg || 0,
-            existingPartnerAvg: enhancedData[0].existingPartnerAvg || 0,
-            selfServiceAvg: enhancedData[0].selfServiceAvg || 0
-          }]}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis tickFormatter={(value) => formatLargeNumber(value)} />
-            <Tooltip content={<CustomAvgTooltip />} />
-            <Legend />
-            <Bar dataKey="newDirectAvg" name="New Direct" fill={categoryColors.newDirect} />
-            <Bar dataKey="newPartnerAvg" name="New Partner" fill={categoryColors.newPartner} />
-            <Bar dataKey="existingClientAvg" name="Existing Client" fill={categoryColors.existingClient} />
-            <Bar dataKey="existingPartnerAvg" name="Existing Partner" fill={categoryColors.existingPartner} />
-            <Bar dataKey="selfServiceAvg" name="Self-Service" fill={categoryColors.selfService} />
-          </BarChart>
-        ) : (
-          // If we have multiple data points, use a bar chart with consistent colors
-          <BarChart data={enhancedData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis tickFormatter={(value) => formatLargeNumber(value)} />
-            <Tooltip content={<CustomAvgTooltip />} />
-            <Legend />
-            <Bar dataKey="newDirectAvg" name="New Direct" fill={categoryColors.newDirect} />
-            <Bar dataKey="newPartnerAvg" name="New Partner" fill={categoryColors.newPartner} />
-            <Bar dataKey="existingClientAvg" name="Existing Client" fill={categoryColors.existingClient} />
-            <Bar dataKey="existingPartnerAvg" name="Existing Partner" fill={categoryColors.existingPartner} />
-            <Bar dataKey="selfServiceAvg" name="Self-Service" fill={categoryColors.selfService} />
-          </BarChart>
-        )}
+        <BarChart data={data}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="date" />
+          <YAxis tickFormatter={(value) => formatLargeNumber(value)} />
+          <Tooltip content={<CustomAvgTooltip />} />
+          <Legend content={<CustomLegend />} />
+          
+          {visibleCategories.map((category) => (
+            <Bar 
+              key={category.dataKey} 
+              dataKey={category.dataKey} 
+              name={category.name} 
+              fill={category.fill}
+            />
+          ))}
+        </BarChart>
       </ResponsiveContainer>
     </div>
   );
