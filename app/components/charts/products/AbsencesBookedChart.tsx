@@ -1,26 +1,90 @@
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend, 
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  AreaChart,
+  Area
+} from 'recharts';
 import { ChartProps, appColors, formatLargeNumber, tooltipFormatter } from './types';
 
-const AbsencesBookedChart: React.FC<ChartProps> = ({ data }) => {
+interface AbsencesBookedChartProps extends ChartProps {
+  visualizationType?: 'bar' | 'line' | 'stacked';
+}
+
+const AbsencesBookedChart: React.FC<AbsencesBookedChartProps> = ({ data, visualizationType = 'bar' }) => {
   if (data.length === 0) return null;
+  
+  const renderChart = () => {
+    const commonProps = {
+      data,
+      width: '100%',
+      height: 300
+    };
+
+    const commonAxisProps = (
+      <>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="displayDate" />
+        <YAxis tickFormatter={(value) => formatLargeNumber(value)} />
+        <Tooltip 
+          labelFormatter={(value) => `Date: ${value}`}
+          formatter={tooltipFormatter}
+        />
+        <Legend />
+      </>
+    );
+    
+    switch (visualizationType) {
+      case 'bar':
+        return (
+          <BarChart {...commonProps}>
+            {commonAxisProps}
+            <Bar dataKey="webAbsencesBooked" name="Web App" fill={appColors.web} />
+            <Bar dataKey="mobileAbsencesBooked" name="Mobile App" fill={appColors.mobile} />
+          </BarChart>
+        );
+      
+      case 'line':
+        return (
+          <LineChart {...commonProps}>
+            {commonAxisProps}
+            <Line type="monotone" dataKey="webAbsencesBooked" name="Web App" stroke={appColors.web} activeDot={{ r: 8 }} />
+            <Line type="monotone" dataKey="mobileAbsencesBooked" name="Mobile App" stroke={appColors.mobile} activeDot={{ r: 8 }} />
+          </LineChart>
+        );
+      
+      case 'stacked':
+        return (
+          <BarChart {...commonProps}>
+            {commonAxisProps}
+            <Bar dataKey="webAbsencesBooked" name="Web App" stackId="a" fill={appColors.web} />
+            <Bar dataKey="mobileAbsencesBooked" name="Mobile App" stackId="a" fill={appColors.mobile} />
+          </BarChart>
+        );
+      
+      default:
+        return (
+          <BarChart {...commonProps}>
+            {commonAxisProps}
+            <Bar dataKey="webAbsencesBooked" name="Web App" fill={appColors.web} />
+            <Bar dataKey="mobileAbsencesBooked" name="Mobile App" fill={appColors.mobile} />
+          </BarChart>
+        );
+    }
+  };
   
   return (
     <div>
-      <h3 className="text-lg font-medium mb-3">Absences Booked</h3>
       <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="displayDate" />
-          <YAxis tickFormatter={(value) => formatLargeNumber(value)} />
-          <Tooltip 
-            labelFormatter={(value) => `Date: ${value}`}
-            formatter={tooltipFormatter}
-          />
-          <Legend />
-          <Bar dataKey="webAbsencesBooked" name="Web App" fill={appColors.web} />
-          <Bar dataKey="mobileAbsencesBooked" name="Mobile App" fill={appColors.mobile} />
-        </BarChart>
+        {renderChart()}
       </ResponsiveContainer>
     </div>
   );

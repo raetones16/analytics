@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { SyntheticDataIndicator } from './SyntheticDataIndicator';
 import { CSATData } from './charts/csat/types';
 import { SummaryStats } from './charts/csat';
@@ -10,6 +10,8 @@ import {
   ImpactLevelChart,
   TicketTypesChart
 } from './charts/csat/revised';
+import { VisualizationToggle } from './VisualizationToggle';
+import { saveVisualizationPreferences, loadVisualizationPreferences } from '../utils/storage/localStorage';
 
 interface CSATChartsProps {
   data: CSATData[];
@@ -17,6 +19,46 @@ interface CSATChartsProps {
 }
 
 export function RevisedCSATCharts({ data, dateRange }: CSATChartsProps) {
+  // State for visualization preferences
+  const [visualPreferences, setVisualPreferences] = useState({
+    helpTopics: 'horizontalBar', // default
+    impactLevel: 'pie',
+    ticketTypes: 'horizontalBar',
+    monthlyTickets: 'line'
+  });
+
+  // On initial load, load preferences from localStorage
+  useEffect(() => {
+    const storedPrefs = loadVisualizationPreferences();
+    if (storedPrefs) {
+      // Only update for CSAT chart preferences
+      const csatPrefs = {
+        helpTopics: storedPrefs.helpTopics || visualPreferences.helpTopics,
+        impactLevel: storedPrefs.impactLevel || visualPreferences.impactLevel,
+        ticketTypes: storedPrefs.ticketTypes || visualPreferences.ticketTypes,
+        monthlyTickets: storedPrefs.monthlyTickets || visualPreferences.monthlyTickets
+      };
+      setVisualPreferences(prev => ({ ...prev, ...csatPrefs }));
+    }
+  }, []);
+
+  // Function to handle visualization type changes
+  const handleVisualizationChange = (chartName: string, value: string) => {
+    const newPrefs = {
+      ...visualPreferences,
+      [chartName]: value
+    };
+    
+    setVisualPreferences(newPrefs);
+    
+    // Save to localStorage
+    const storedPrefs = loadVisualizationPreferences();
+    saveVisualizationPreferences({
+      ...storedPrefs,
+      [chartName]: value
+    });
+  };
+
   // Check for synthetic data flags
   const hasSyntheticTickets = data.some(item => 
     (typeof item._synthetic === 'boolean' && item._synthetic) || 
@@ -58,23 +100,87 @@ export function RevisedCSATCharts({ data, dateRange }: CSATChartsProps) {
       {/* Monthly Tickets Chart - Only show for date ranges longer than a month */}
       {dateRange !== 'month' && (
         <div className="mb-12">
-          <MonthlyTicketsChart data={data} />
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-medium">Monthly Ticket Volume</h3>
+            <VisualizationToggle
+              current={visualPreferences.monthlyTickets}
+              options={[
+                { value: 'line', label: 'Line' },
+                { value: 'bar', label: 'Bar' },
+                { value: 'area', label: 'Area' }
+              ]}
+              onChange={handleVisualizationChange}
+              chartName="monthlyTickets"
+            />
+          </div>
+          <MonthlyTicketsChart 
+            data={data} 
+            visualizationType={visualPreferences.monthlyTickets}
+          />
         </div>
       )}
       
       <div className="mb-12">
         {/* Help Topics Chart */}
-        <HelpTopicsChart data={data} />
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-medium">Tickets by Help Topic</h3>
+          <VisualizationToggle
+            current={visualPreferences.helpTopics}
+            options={[
+              { value: 'horizontalBar', label: 'Bar' },
+              { value: 'pie', label: 'Pie' },
+              { value: 'treemap', label: 'TreeMap' }
+            ]}
+            onChange={handleVisualizationChange}
+            chartName="helpTopics"
+          />
+        </div>
+        <HelpTopicsChart 
+          data={data} 
+          visualizationType={visualPreferences.helpTopics}
+        />
       </div>
       
       <div className="mb-12">
         {/* Impact Level Chart */}
-        <ImpactLevelChart data={data} />
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-medium">Tickets by Impact Level</h3>
+          <VisualizationToggle
+            current={visualPreferences.impactLevel}
+            options={[
+              { value: 'pie', label: 'Pie' },
+              { value: 'bar', label: 'Bar' },
+              { value: 'donut', label: 'Donut' }
+            ]}
+            onChange={handleVisualizationChange}
+            chartName="impactLevel"
+          />
+        </div>
+        <ImpactLevelChart 
+          data={data} 
+          visualizationType={visualPreferences.impactLevel}
+        />
       </div>
       
       <div className="mb-12">
         {/* Ticket Types Chart */}
-        <TicketTypesChart data={data} />
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-medium">Tickets by Type</h3>
+          <VisualizationToggle
+            current={visualPreferences.ticketTypes}
+            options={[
+              { value: 'horizontalBar', label: 'Bar' },
+              { value: 'pie', label: 'Pie' },
+              { value: 'donut', label: 'Donut' }
+            ]}
+            onChange={handleVisualizationChange}
+            chartName="ticketTypes"
+          />
+        </div>
+        <TicketTypesChart 
+          data={data} 
+          visualizationType={visualPreferences.ticketTypes}
+        />
       </div>
     </div>
   );

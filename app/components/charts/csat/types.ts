@@ -29,11 +29,18 @@ export interface CSATData {
 
 export interface ChartProps {
   data: CSATData[];
+  visualizationType?: string;
 }
 
 export interface SummaryProps {
   data: CSATData;
 }
+
+// Visualization type definitions
+export type HelpTopicsVisualizationType = 'horizontalBar' | 'pie' | 'treemap';
+export type ImpactLevelVisualizationType = 'bar' | 'pie' | 'donut';
+export type TicketTypesVisualizationType = 'horizontalBar' | 'pie' | 'donut';
+export type MonthlyTicketsVisualizationType = 'line' | 'bar' | 'area';
 
 // Colors for charts
 export const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];

@@ -1,10 +1,27 @@
 "use client";
 
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer, 
+  Legend, 
+  PieChart, 
+  Pie, 
+  Cell,
+  Treemap
+} from 'recharts';
 import { ChartProps } from '../types';
 
-export function HelpTopicsChart({ data }: ChartProps) {
+interface HelpTopicsChartProps extends ChartProps {
+  visualizationType?: 'horizontalBar' | 'pie' | 'treemap';
+}
+
+export function HelpTopicsChart({ data, visualizationType = 'horizontalBar' }: HelpTopicsChartProps) {
   // Get the latest data point for the chart
   const latestData = data.length > 0 
     ? data.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] 
@@ -13,7 +30,6 @@ export function HelpTopicsChart({ data }: ChartProps) {
   if (!latestData) {
     return (
       <div>
-        <h3 className="text-lg font-medium mb-3">Tickets by Help Topic</h3>
         <p>No data available</p>
       </div>
     );
@@ -21,13 +37,19 @@ export function HelpTopicsChart({ data }: ChartProps) {
   
   // Prepare data for the chart - sort by count descending and limit to top 10
   const chartData = Object.entries(latestData.supportTopics)
-    .map(([topic, count]) => ({ topic, count }))
+    .map(([topic, count]) => ({ topic, count, value: count })) // Adding 'value' for Treemap
     .sort((a, b) => b.count - a.count)
     .slice(0, 10); // Limit to top 10 for better readability
   
-  return (
-    <div>
-      <h3 className="text-lg font-medium mb-3">Tickets by Help Topic (Top 10)</h3>
+  // Colors for pie chart and treemap
+  const COLORS = [
+    '#00C49F', '#0088FE', '#FFBB28', '#FF8042', '#8884d8', 
+    '#82ca9d', '#ffc658', '#8dd1e1', '#a4de6c', '#d0ed57'
+  ];
+
+  // Render horizontal bar chart
+  if (visualizationType === 'horizontalBar') {
+    return (
       <ResponsiveContainer width="100%" height={500}>
         <BarChart
           data={chartData}
@@ -47,6 +69,101 @@ export function HelpTopicsChart({ data }: ChartProps) {
           <Bar dataKey="count" name="Tickets" fill="#00C49F" />
         </BarChart>
       </ResponsiveContainer>
-    </div>
-  );
+    );
+  }
+
+  // Render pie chart
+  if (visualizationType === 'pie') {
+    return (
+      <ResponsiveContainer width="100%" height={500}>
+        <PieChart>
+          <Pie
+            data={chartData}
+            cx="50%"
+            cy="50%"
+            labelLine={true}
+            outerRadius={160}
+            fill="#8884d8"
+            dataKey="count"
+            nameKey="topic"
+            label={({ topic, count, percent }) => `${topic}: ${count} (${(percent * 100).toFixed(0)}%)`}
+          >
+            {chartData.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            ))}
+          </Pie>
+          <Tooltip formatter={(value) => [`${value} tickets`, 'Count']} />
+          <Legend />
+        </PieChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  // Render treemap with improved labels
+  if (visualizationType === 'treemap') {
+    return (
+      <ResponsiveContainer width="100%" height={500}>
+        <Treemap
+          data={chartData}
+          dataKey="value"
+          nameKey="topic"
+          aspectRatio={4/3}
+          stroke="#fff"
+          fill="#8884d8"
+          // Add content label to show topic name and count
+          content={({ root, depth, x, y, width, height, index, payload, colors, rank, name }) => {
+            // Only render if space is sufficient for readable text
+            const isLabelVisible = width > 30 && height > 20;
+            const item = chartData[index];
+            return (
+              <g>
+                <rect
+                  x={x}
+                  y={y}
+                  width={width}
+                  height={height}
+                  style={{
+                    fill: COLORS[index % COLORS.length],
+                    stroke: '#fff',
+                    strokeWidth: 2 / (depth + 1e-10),
+                    strokeOpacity: 1 / (depth + 1e-10),
+                  }}
+                />
+                {isLabelVisible && (
+                  <>
+                    <text
+                      x={x + width / 2}
+                      y={y + height / 2 - 8}
+                      textAnchor="middle"
+                      fill="#fff"
+                      fontSize={12}
+                      fontWeight="bold"
+                    >
+                      {item.topic}
+                    </text>
+                    <text
+                      x={x + width / 2}
+                      y={y + height / 2 + 8}
+                      textAnchor="middle"
+                      fill="#fff"
+                      fontSize={10}
+                    >
+                      {item.count} tickets
+                    </text>
+                  </>
+                )}
+              </g>
+            );
+          }}
+        >
+          {chartData.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+          ))}
+        </Treemap>
+      </ResponsiveContainer>
+    );
+  }
+
+  // Default fallback (should never happen due to default param)
+  return <div>Unsupported visualization type</div>;
 }

@@ -1,9 +1,26 @@
 import React, { useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend, 
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  AreaChart,
+  Area
+} from 'recharts';
 import { ChartProps, categoryColors, formatLargeNumber, CategoryKey } from './types';
 import { CustomAvgTooltip } from './tooltips';
 
-const AverageOrderValueChart: React.FC<ChartProps> = ({ data }) => {
+interface AverageOrderValueChartProps extends ChartProps {
+  visualizationType?: 'line' | 'bar' | 'area';
+}
+
+const AverageOrderValueChart: React.FC<AverageOrderValueChartProps> = ({ data, visualizationType = 'line' }) => {
   if (data.length === 0) return null;
   
   // Local state to track which category is active
@@ -16,30 +33,35 @@ const AverageOrderValueChart: React.FC<ChartProps> = ({ data }) => {
       dataKey: "newDirectAvg", 
       name: "New Direct", 
       fill: categoryColors.newDirect,
+      stroke: categoryColors.newDirect,
       categoryKey: 'newDirect' as CategoryKey
     },
     { 
       dataKey: "newPartnerAvg", 
       name: "New Partner", 
       fill: categoryColors.newPartner,
+      stroke: categoryColors.newPartner,
       categoryKey: 'newPartner' as CategoryKey
     },
     { 
       dataKey: "existingClientAvg", 
       name: "Existing Client", 
       fill: categoryColors.existingClient,
+      stroke: categoryColors.existingClient,
       categoryKey: 'existingClient' as CategoryKey
     },
     { 
       dataKey: "existingPartnerAvg", 
       name: "Existing Partner", 
       fill: categoryColors.existingPartner,
+      stroke: categoryColors.existingPartner,
       categoryKey: 'existingPartner' as CategoryKey
     },
     { 
       dataKey: "selfServiceAvg", 
       name: "Self-Service", 
       fill: categoryColors.selfService,
+      stroke: categoryColors.selfService,
       categoryKey: 'selfService' as CategoryKey
     }
   ];
@@ -115,30 +137,94 @@ const AverageOrderValueChart: React.FC<ChartProps> = ({ data }) => {
     </p>
   );
   
-  return (
-    <div>
-      <h3 className="text-lg font-medium mb-1">Average Order Value by Category</h3>
-      {helpText}
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="date" />
-          <YAxis tickFormatter={(value) => formatLargeNumber(value)} />
-          <Tooltip content={<CustomAvgTooltip />} />
-          <Legend content={<CustomLegend />} />
-          
-          {visibleCategories.map((category) => (
-            <Bar 
-              key={category.dataKey} 
-              dataKey={category.dataKey} 
-              name={category.name} 
-              fill={category.fill}
-            />
-          ))}
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
-  );
+  // Render bar chart
+  if (visualizationType === 'bar') {
+    return (
+      <div>
+        {helpText}
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="date" />
+            <YAxis tickFormatter={(value) => formatLargeNumber(value)} />
+            <Tooltip content={<CustomAvgTooltip />} />
+            <Legend content={<CustomLegend />} />
+            
+            {visibleCategories.map((category) => (
+              <Bar 
+                key={category.dataKey} 
+                dataKey={category.dataKey} 
+                name={category.name} 
+                fill={category.fill}
+              />
+            ))}
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  }
+  
+  // Render line chart
+  if (visualizationType === 'line') {
+    return (
+      <div>
+        {helpText}
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="date" />
+            <YAxis tickFormatter={(value) => formatLargeNumber(value)} />
+            <Tooltip content={<CustomAvgTooltip />} />
+            <Legend content={<CustomLegend />} />
+            
+            {visibleCategories.map((category) => (
+              <Line 
+                key={category.dataKey} 
+                type="monotone"
+                dataKey={category.dataKey} 
+                name={category.name} 
+                stroke={category.stroke}
+                activeDot={{ r: 8 }}
+              />
+            ))}
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  }
+  
+  // Render area chart
+  if (visualizationType === 'area') {
+    return (
+      <div>
+        {helpText}
+        <ResponsiveContainer width="100%" height={300}>
+          <AreaChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="date" />
+            <YAxis tickFormatter={(value) => formatLargeNumber(value)} />
+            <Tooltip content={<CustomAvgTooltip />} />
+            <Legend content={<CustomLegend />} />
+            
+            {visibleCategories.map((category) => (
+              <Area 
+                key={category.dataKey} 
+                type="monotone"
+                dataKey={category.dataKey} 
+                name={category.name} 
+                stroke={category.stroke}
+                fill={category.fill}
+                fillOpacity={0.3}
+              />
+            ))}
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+    );
+  }
+  
+  // Default fallback
+  return <div>Unsupported visualization type</div>;
 };
 
 export default AverageOrderValueChart;
