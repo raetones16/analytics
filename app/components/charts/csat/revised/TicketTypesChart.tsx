@@ -15,6 +15,7 @@ import {
   Cell
 } from 'recharts';
 import { ChartProps } from '../types';
+import { StandardTooltip, numberFormatter } from '../../tooltips';
 
 interface TicketTypesChartProps extends ChartProps {
   visualizationType?: 'horizontalBar' | 'pie' | 'donut';
@@ -62,7 +63,7 @@ export function TicketTypesChart({ data, visualizationType = 'horizontalBar' }: 
             width={95}
             tick={{ fontSize: 12 }}
           />
-          <Tooltip formatter={(value) => [`${value} tickets`, 'Count']} />
+          <Tooltip content={<StandardTooltip formatter={numberFormatter} />} />
           <Legend />
           <Bar dataKey="count" name="Tickets" fill="#FFBB28" />
         </BarChart>
@@ -90,7 +91,7 @@ export function TicketTypesChart({ data, visualizationType = 'horizontalBar' }: 
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
-          <Tooltip formatter={(value) => [`${value} tickets`, 'Count']} />
+          <Tooltip content={<StandardTooltip formatter={numberFormatter} />} />
           <Legend />
         </PieChart>
       </ResponsiveContainer>
@@ -117,7 +118,7 @@ export function TicketTypesChart({ data, visualizationType = 'horizontalBar' }: 
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
-          <Tooltip formatter={(value) => [`${value} tickets`, 'Count']} />
+          <Tooltip content={<StandardTooltip formatter={numberFormatter} />} />
           <Legend />
         </PieChart>
       </ResponsiveContainer>

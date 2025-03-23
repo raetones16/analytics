@@ -22,7 +22,7 @@ export function VisualizationToggle({
 }: VisualizationToggleProps) {
   return (
     <div className="flex items-center space-x-2 mb-2">
-      <span className="text-sm text-gray-500">View as:</span>
+      <span className="text-gray-500 text-sm">View as:</span>
       <div className="flex border rounded-md">
         {options.map(option => (
           <button

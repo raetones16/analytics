@@ -25,6 +25,8 @@ interface SalesChartsProps {
 }
 
 export function SalesCharts({ data }: SalesChartsProps) {
+  // State for hover over charts
+  const [hoveredChart, setHoveredChart] = useState<string | null>(null);
   // State for edit mode
   const [isEditingLayout, setIsEditingLayout] = useState(false);
   // State for visualization preferences
@@ -136,12 +138,9 @@ export function SalesCharts({ data }: SalesChartsProps) {
   };
 
   return (
-    <div 
-      className="bg-white p-6 rounded-lg shadow-md mb-6"
-      data-edit-active={isEditingLayout ? "true" : "false"}
-    >
+    <div data-edit-active={isEditingLayout ? "true" : "false"}>
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">Sales Statistics</h2>
+        <h2 className="text-lg font-semibold">Sales Statistics</h2>
         <EditLayoutButton 
           isEditing={isEditingLayout} 
           onClick={toggleEditMode} 
@@ -163,19 +162,26 @@ export function SalesCharts({ data }: SalesChartsProps) {
         onCancel={handleCancelLayout}
       >
         {/* Sales by Category Chart */}
-        <div id="salesByCategory">
+        <div 
+          id="salesByCategory" 
+          className="bg-white p-4 rounded-lg shadow-md relative"
+          onMouseEnter={() => setHoveredChart('salesByCategory')}
+          onMouseLeave={() => setHoveredChart(null)}
+        >
           <div className="flex justify-between items-center mb-3">
-            <h3 className="text-lg font-medium">Sales by Category</h3>
-            <VisualizationToggle
-              current={visualPreferences.salesByCategory}
-              options={[
-                { value: 'pie', label: 'Pie' },
-                { value: 'bar', label: 'Bar' },
-                { value: 'donut', label: 'Donut' }
-              ]}
-              onChange={handleVisualizationChange}
-              chartName="salesByCategory"
-            />
+            <h3 className="text-md">Sales by Category</h3>
+            <div className={`transition-opacity duration-200 ${hoveredChart === 'salesByCategory' ? 'opacity-100' : 'opacity-0'}`}>
+              <VisualizationToggle
+                current={visualPreferences.salesByCategory}
+                options={[
+                  { value: 'pie', label: 'Pie' },
+                  { value: 'bar', label: 'Bar' },
+                  { value: 'donut', label: 'Donut' }
+                ]}
+                onChange={handleVisualizationChange}
+                chartName="salesByCategory"
+              />
+            </div>
           </div>
           <SalesByCategoryChart 
             data={enhancedData} 
@@ -184,19 +190,26 @@ export function SalesCharts({ data }: SalesChartsProps) {
         </div>
         
         {/* Average Order Value Chart */}
-        <div id="averageOrderValue">
+        <div 
+          id="averageOrderValue" 
+          className="bg-white p-4 rounded-lg shadow-md relative"
+          onMouseEnter={() => setHoveredChart('averageOrderValue')}
+          onMouseLeave={() => setHoveredChart(null)}
+        >
           <div className="flex justify-between items-center mb-3">
-            <h3 className="text-lg font-medium">Average Order Value</h3>
-            <VisualizationToggle
-              current={visualPreferences.averageOrderValue}
-              options={[
-                { value: 'line', label: 'Line' },
-                { value: 'bar', label: 'Bar' },
-                { value: 'area', label: 'Area' }
-              ]}
-              onChange={handleVisualizationChange}
-              chartName="averageOrderValue"
-            />
+            <h3 className="text-md">Average Order Value</h3>
+            <div className={`transition-opacity duration-200 ${hoveredChart === 'averageOrderValue' ? 'opacity-100' : 'opacity-0'}`}>
+              <VisualizationToggle
+                current={visualPreferences.averageOrderValue}
+                options={[
+                  { value: 'line', label: 'Line' },
+                  { value: 'bar', label: 'Bar' },
+                  { value: 'area', label: 'Area' }
+                ]}
+                onChange={handleVisualizationChange}
+                chartName="averageOrderValue"
+              />
+            </div>
           </div>
           <AverageOrderValueChart 
             data={enhancedData} 
@@ -205,19 +218,26 @@ export function SalesCharts({ data }: SalesChartsProps) {
         </div>
         
         {/* ARR Growth Chart */}
-        <div id="arrGrowth">
+        <div 
+          id="arrGrowth" 
+          className="bg-white p-4 rounded-lg shadow-md relative"
+          onMouseEnter={() => setHoveredChart('arrGrowth')}
+          onMouseLeave={() => setHoveredChart(null)}
+        >
           <div className="flex justify-between items-center mb-3">
-            <h3 className="text-lg font-medium">ARR Growth</h3>
-            <VisualizationToggle
-              current={visualPreferences.arrGrowth}
-              options={[
-                { value: 'line', label: 'Line' },
-                { value: 'bar', label: 'Bar' },
-                { value: 'area', label: 'Area' }
-              ]}
-              onChange={handleVisualizationChange}
-              chartName="arrGrowth"
-            />
+            <h3 className="text-md">ARR Growth</h3>
+            <div className={`transition-opacity duration-200 ${hoveredChart === 'arrGrowth' ? 'opacity-100' : 'opacity-0'}`}>
+              <VisualizationToggle
+                current={visualPreferences.arrGrowth}
+                options={[
+                  { value: 'line', label: 'Line' },
+                  { value: 'bar', label: 'Bar' },
+                  { value: 'area', label: 'Area' }
+                ]}
+                onChange={handleVisualizationChange}
+                chartName="arrGrowth"
+              />
+            </div>
           </div>
           <ARRGrowthChart 
             data={enhancedData} 
@@ -226,19 +246,26 @@ export function SalesCharts({ data }: SalesChartsProps) {
         </div>
         
         {/* License Types Distribution Chart */}
-        <div id="licenseTypes">
+        <div 
+          id="licenseTypes" 
+          className="bg-white p-4 rounded-lg shadow-md relative"
+          onMouseEnter={() => setHoveredChart('licenseTypes')}
+          onMouseLeave={() => setHoveredChart(null)}
+        >
           <div className="flex justify-between items-center mb-3">
-            <h3 className="text-lg font-medium">License Types</h3>
-            <VisualizationToggle
-              current={visualPreferences.licenseTypes}
-              options={[
-                { value: 'pie', label: 'Pie' },
-                { value: 'bar', label: 'Bar' },
-                { value: 'donut', label: 'Donut' }
-              ]}
-              onChange={handleVisualizationChange}
-              chartName="licenseTypes"
-            />
+            <h3 className="text-md">License Types</h3>
+            <div className={`transition-opacity duration-200 ${hoveredChart === 'licenseTypes' ? 'opacity-100' : 'opacity-0'}`}>
+              <VisualizationToggle
+                current={visualPreferences.licenseTypes}
+                options={[
+                  { value: 'pie', label: 'Pie' },
+                  { value: 'bar', label: 'Bar' },
+                  { value: 'donut', label: 'Donut' }
+                ]}
+                onChange={handleVisualizationChange}
+                chartName="licenseTypes"
+              />
+            </div>
           </div>
           <LicenseTypesChart 
             data={enhancedData} 
@@ -247,19 +274,26 @@ export function SalesCharts({ data }: SalesChartsProps) {
         </div>
         
         {/* Sales Count by Category Chart */}
-        <div id="salesCount">
+        <div 
+          id="salesCount" 
+          className="bg-white p-4 rounded-lg shadow-md relative"
+          onMouseEnter={() => setHoveredChart('salesCount')}
+          onMouseLeave={() => setHoveredChart(null)}
+        >
           <div className="flex justify-between items-center mb-3">
-            <h3 className="text-lg font-medium">Sales Count</h3>
-            <VisualizationToggle
-              current={visualPreferences.salesCount}
-              options={[
-                { value: 'bar', label: 'Bar' },
-                { value: 'line', label: 'Line' },
-                { value: 'stacked', label: 'Stacked' }
-              ]}
-              onChange={handleVisualizationChange}
-              chartName="salesCount"
-            />
+            <h3 className="text-md">Sales Count</h3>
+            <div className={`transition-opacity duration-200 ${hoveredChart === 'salesCount' ? 'opacity-100' : 'opacity-0'}`}>
+              <VisualizationToggle
+                current={visualPreferences.salesCount}
+                options={[
+                  { value: 'bar', label: 'Bar' },
+                  { value: 'line', label: 'Line' },
+                  { value: 'stacked', label: 'Stacked' }
+                ]}
+                onChange={handleVisualizationChange}
+                chartName="salesCount"
+              />
+            </div>
           </div>
           <SalesCountChart 
             data={enhancedData} 
@@ -268,19 +302,26 @@ export function SalesCharts({ data }: SalesChartsProps) {
         </div>
         
         {/* Total Monthly Sales Value Chart */}
-        <div id="totalSalesValue">
+        <div 
+          id="totalSalesValue" 
+          className="bg-white p-4 rounded-lg shadow-md relative"
+          onMouseEnter={() => setHoveredChart('totalSalesValue')}
+          onMouseLeave={() => setHoveredChart(null)}
+        >
           <div className="flex justify-between items-center mb-3">
-            <h3 className="text-lg font-medium">Total Sales Value</h3>
-            <VisualizationToggle
-              current={visualPreferences.totalSalesValue}
-              options={[
-                { value: 'line', label: 'Line' },
-                { value: 'bar', label: 'Bar' },
-                { value: 'area', label: 'Area' }
-              ]}
-              onChange={handleVisualizationChange}
-              chartName="totalSalesValue"
-            />
+            <h3 className="text-md">Total Sales Value</h3>
+            <div className={`transition-opacity duration-200 ${hoveredChart === 'totalSalesValue' ? 'opacity-100' : 'opacity-0'}`}>
+              <VisualizationToggle
+                current={visualPreferences.totalSalesValue}
+                options={[
+                  { value: 'line', label: 'Line' },
+                  { value: 'bar', label: 'Bar' },
+                  { value: 'area', label: 'Area' }
+                ]}
+                onChange={handleVisualizationChange}
+                chartName="totalSalesValue"
+              />
+            </div>
           </div>
           <TotalSalesValueChart 
             data={enhancedData} 

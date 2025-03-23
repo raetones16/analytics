@@ -12,7 +12,7 @@ export function EditLayoutButton({ isEditing, onClick }: EditLayoutButtonProps) 
     <button
       onClick={onClick}
       className={`
-        flex items-center px-3 py-1.5 rounded text-sm font-medium transition-colors shadow-sm
+        flex items-center px-3 py-1.5 rounded font-medium transition-colors shadow-sm text-sm
         ${isEditing 
           ? 'bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-300 border' 
           : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border-gray-200 border'}

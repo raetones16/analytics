@@ -16,6 +16,7 @@ import {
 } from 'recharts';
 import { ChartProps } from '../types';
 import { formatDateForDisplay } from '../../../../utils/date-utils';
+import { StandardTooltip, numberFormatter } from '../../tooltips';
 
 interface MonthlyTicketsChartProps extends ChartProps {
   visualizationType?: 'line' | 'bar' | 'area';
@@ -24,9 +25,8 @@ interface MonthlyTicketsChartProps extends ChartProps {
 export function MonthlyTicketsChart({ data, visualizationType = 'line' }: MonthlyTicketsChartProps) {
   // Format data for the chart
   const chartData = data
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     .map(item => ({
-      month: formatDateForDisplay(new Date(item.date)),
+      month: item.displayDate || formatDateForDisplay(new Date(item.date)),
       tickets: item.totalTickets
     }));
 
@@ -50,7 +50,7 @@ export function MonthlyTicketsChart({ data, visualizationType = 'line' }: Monthl
             height={60}
           />
           <YAxis />
-          <Tooltip formatter={(value) => [`${value} tickets`, 'Total']} />
+          <Tooltip content={<StandardTooltip formatter={numberFormatter} />} />
           <Line 
             type="monotone" 
             dataKey="tickets" 
@@ -79,7 +79,7 @@ export function MonthlyTicketsChart({ data, visualizationType = 'line' }: Monthl
             height={60}
           />
           <YAxis />
-          <Tooltip formatter={(value) => [`${value} tickets`, 'Total']} />
+          <Tooltip content={<StandardTooltip formatter={numberFormatter} />} />
           <Bar dataKey="tickets" fill="#8884d8" name="Total Tickets" />
         </BarChart>
       </ResponsiveContainer>
@@ -102,7 +102,7 @@ export function MonthlyTicketsChart({ data, visualizationType = 'line' }: Monthl
             height={60}
           />
           <YAxis />
-          <Tooltip formatter={(value) => [`${value} tickets`, 'Total']} />
+          <Tooltip content={<StandardTooltip formatter={numberFormatter} />} />
           <Area 
             type="monotone" 
             dataKey="tickets" 

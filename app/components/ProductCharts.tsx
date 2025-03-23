@@ -23,6 +23,8 @@ interface ProductChartsProps {
 }
 
 export function ProductCharts({ data }: ProductChartsProps) {
+  // State for hover over charts
+  const [hoveredChart, setHoveredChart] = useState<string | null>(null);
   // State for edit mode
   const [isEditingLayout, setIsEditingLayout] = useState(false);
   // State for visualization preferences
@@ -117,12 +119,9 @@ export function ProductCharts({ data }: ProductChartsProps) {
   };
 
   return (
-    <div 
-      className="bg-white p-6 rounded-lg shadow-md mb-6"
-      data-edit-active={isEditingLayout ? "true" : "false"}
-    >
+    <div data-edit-active={isEditingLayout ? "true" : "false"}>
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">Product Usage</h2>
+        <h2 className="text-lg font-semibold">Product Usage</h2>
         <EditLayoutButton 
           isEditing={isEditingLayout} 
           onClick={toggleEditMode} 
@@ -145,19 +144,26 @@ export function ProductCharts({ data }: ProductChartsProps) {
         onCancel={handleCancelLayout}
       >
         {/* User Logins Chart */}
-        <div id="userLogins">
+        <div 
+          id="userLogins" 
+          className="bg-white p-4 rounded-lg shadow-md relative" 
+          onMouseEnter={() => setHoveredChart('userLogins')} 
+          onMouseLeave={() => setHoveredChart(null)}
+        >
           <div className="flex justify-between items-center mb-3">
-            <h3 className="text-lg font-medium">User Logins</h3>
-            <VisualizationToggle
-              current={visualPreferences.userLogins}
-              options={[
-                { value: 'line', label: 'Line' },
-                { value: 'bar', label: 'Bar' },
-                { value: 'area', label: 'Area' }
-              ]}
-              onChange={handleVisualizationChange}
-              chartName="userLogins"
-            />
+            <h3 className="text-md">User Logins</h3>
+            <div className={`transition-opacity duration-200 ${hoveredChart === 'userLogins' ? 'opacity-100' : 'opacity-0'}`}>
+              <VisualizationToggle
+                current={visualPreferences.userLogins}
+                options={[
+                  { value: 'line', label: 'Line' },
+                  { value: 'bar', label: 'Bar' },
+                  { value: 'area', label: 'Area' }
+                ]}
+                onChange={handleVisualizationChange}
+                chartName="userLogins"
+              />
+            </div>
           </div>
           <UserLoginsChart 
             data={data} 
@@ -166,19 +172,26 @@ export function ProductCharts({ data }: ProductChartsProps) {
         </div>
         
         {/* Absences Booked Chart */}
-        <div id="absencesBooked">
+        <div 
+          id="absencesBooked" 
+          className="bg-white p-4 rounded-lg shadow-md relative" 
+          onMouseEnter={() => setHoveredChart('absencesBooked')} 
+          onMouseLeave={() => setHoveredChart(null)}
+        >
           <div className="flex justify-between items-center mb-3">
-            <h3 className="text-lg font-medium">Absences Booked</h3>
-            <VisualizationToggle
-              current={visualPreferences.absencesBooked}
-              options={[
-                { value: 'bar', label: 'Bar' },
-                { value: 'line', label: 'Line' },
-                { value: 'stacked', label: 'Stacked' }
-              ]}
-              onChange={handleVisualizationChange}
-              chartName="absencesBooked"
-            />
+            <h3 className="text-md">Absences Booked</h3>
+            <div className={`transition-opacity duration-200 ${hoveredChart === 'absencesBooked' ? 'opacity-100' : 'opacity-0'}`}>
+              <VisualizationToggle
+                current={visualPreferences.absencesBooked}
+                options={[
+                  { value: 'bar', label: 'Bar' },
+                  { value: 'line', label: 'Line' },
+                  { value: 'stacked', label: 'Stacked' }
+                ]}
+                onChange={handleVisualizationChange}
+                chartName="absencesBooked"
+              />
+            </div>
           </div>
           <AbsencesBookedChart 
             data={data} 
@@ -187,19 +200,26 @@ export function ProductCharts({ data }: ProductChartsProps) {
         </div>
         
         {/* Timesheets Submitted Chart */}
-        <div id="timesheetsSubmitted">
+        <div 
+          id="timesheetsSubmitted" 
+          className="bg-white p-4 rounded-lg shadow-md relative" 
+          onMouseEnter={() => setHoveredChart('timesheetsSubmitted')} 
+          onMouseLeave={() => setHoveredChart(null)}
+        >
           <div className="flex justify-between items-center mb-3">
-            <h3 className="text-lg font-medium">Timesheets Submitted</h3>
-            <VisualizationToggle
-              current={visualPreferences.timesheetsSubmitted}
-              options={[
-                { value: 'line', label: 'Line' },
-                { value: 'bar', label: 'Bar' },
-                { value: 'stacked', label: 'Stacked' }
-              ]}
-              onChange={handleVisualizationChange}
-              chartName="timesheetsSubmitted"
-            />
+            <h3 className="text-md">Timesheets Submitted</h3>
+            <div className={`transition-opacity duration-200 ${hoveredChart === 'timesheetsSubmitted' ? 'opacity-100' : 'opacity-0'}`}>
+              <VisualizationToggle
+                current={visualPreferences.timesheetsSubmitted}
+                options={[
+                  { value: 'line', label: 'Line' },
+                  { value: 'bar', label: 'Bar' },
+                  { value: 'stacked', label: 'Stacked' }
+                ]}
+                onChange={handleVisualizationChange}
+                chartName="timesheetsSubmitted"
+              />
+            </div>
           </div>
           <TimesheetsSubmittedChart 
             data={data} 
@@ -208,19 +228,26 @@ export function ProductCharts({ data }: ProductChartsProps) {
         </div>
         
         {/* Workflows Created Chart */}
-        <div id="workflowsCreated">
+        <div 
+          id="workflowsCreated" 
+          className="bg-white p-4 rounded-lg shadow-md relative" 
+          onMouseEnter={() => setHoveredChart('workflowsCreated')} 
+          onMouseLeave={() => setHoveredChart(null)}
+        >
           <div className="flex justify-between items-center mb-3">
-            <h3 className="text-lg font-medium">Workflows Created</h3>
-            <VisualizationToggle
-              current={visualPreferences.workflowsCreated}
-              options={[
-                { value: 'bar', label: 'Bar' },
-                { value: 'line', label: 'Line' },
-                { value: 'area', label: 'Area' }
-              ]}
-              onChange={handleVisualizationChange}
-              chartName="workflowsCreated"
-            />
+            <h3 className="text-md">Workflows Created</h3>
+            <div className={`transition-opacity duration-200 ${hoveredChart === 'workflowsCreated' ? 'opacity-100' : 'opacity-0'}`}>
+              <VisualizationToggle
+                current={visualPreferences.workflowsCreated}
+                options={[
+                  { value: 'bar', label: 'Bar' },
+                  { value: 'line', label: 'Line' },
+                  { value: 'area', label: 'Area' }
+                ]}
+                onChange={handleVisualizationChange}
+                chartName="workflowsCreated"
+              />
+            </div>
           </div>
           <WorkflowsCreatedChart 
             data={data} 

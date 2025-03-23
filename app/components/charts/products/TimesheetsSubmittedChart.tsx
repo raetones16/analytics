@@ -13,7 +13,8 @@ import {
   AreaChart,
   Area
 } from 'recharts';
-import { ChartProps, appColors, formatLargeNumber, tooltipFormatter } from './types';
+import { ChartProps, appColors, formatLargeNumber } from './types';
+import { StandardTooltip, numberFormatter } from '../tooltips';
 
 interface TimesheetsSubmittedChartProps extends ChartProps {
   visualizationType?: 'bar' | 'line' | 'stacked';
@@ -25,7 +26,6 @@ const TimesheetsSubmittedChart: React.FC<TimesheetsSubmittedChartProps> = ({ dat
   const renderChart = () => {
     const commonProps = {
       data,
-      width: '100%',
       height: 300
     };
 
@@ -34,10 +34,7 @@ const TimesheetsSubmittedChart: React.FC<TimesheetsSubmittedChartProps> = ({ dat
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="displayDate" />
         <YAxis tickFormatter={(value) => formatLargeNumber(value)} />
-        <Tooltip 
-          labelFormatter={(value) => `Date: ${value}`}
-          formatter={tooltipFormatter}
-        />
+        <Tooltip content={<StandardTooltip formatter={numberFormatter} />} />
         <Legend />
       </>
     );

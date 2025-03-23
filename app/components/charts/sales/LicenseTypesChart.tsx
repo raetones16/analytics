@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { CustomLicenseTooltip } from './tooltips';
 import { 
   BarChart, 
   Bar, 
@@ -124,7 +125,7 @@ const LicenseTypesChart: React.FC<LicenseTypesChartProps> = ({ data, visualizati
                   className="recharts-legend-icon"
                 />
               </svg>
-              <span style={{ color: isActive ? '#666' : '#999' }}>{licenseType.name}</span>
+              <span style={{ color: isActive ? '#666' : '#999', fontSize: '0.7rem' }}>{licenseType.name}</span>
             </li>
           );
         })}
@@ -141,7 +142,7 @@ const LicenseTypesChart: React.FC<LicenseTypesChartProps> = ({ data, visualizati
   
   // Get latest data point for pie/donut charts
   const latestData = data.length > 0 
-    ? data.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] 
+    ? data[data.length - 1]  // Data should already be sorted by date
     : null;
   
   // Prepare data for pie/donut charts
@@ -167,13 +168,12 @@ const LicenseTypesChart: React.FC<LicenseTypesChartProps> = ({ data, visualizati
   if (visualizationType === 'bar') {
     return (
       <div>
-        {helpText}
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
+            <XAxis dataKey="displayDate" />
             <YAxis tickFormatter={(value) => formatLargeNumber(value)} />
-            <Tooltip formatter={(value: any) => value.toLocaleString()} />
+            <Tooltip content={<CustomLicenseTooltip />} />
             <Legend content={<CustomLegend />} />
             
             {visibleLicenseTypes.map((licenseType) => (
@@ -195,7 +195,6 @@ const LicenseTypesChart: React.FC<LicenseTypesChartProps> = ({ data, visualizati
   if (visualizationType === 'pie') {
     return (
       <div>
-        {helpText}
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
             <Pie
@@ -218,7 +217,7 @@ const LicenseTypesChart: React.FC<LicenseTypesChartProps> = ({ data, visualizati
               ))}
             </Pie>
             <Legend content={<CustomLegend />} />
-            <Tooltip formatter={(value: any) => value.toLocaleString()} />
+            <Tooltip content={<CustomLicenseTooltip />} />
           </PieChart>
         </ResponsiveContainer>
       </div>
@@ -229,7 +228,6 @@ const LicenseTypesChart: React.FC<LicenseTypesChartProps> = ({ data, visualizati
   if (visualizationType === 'donut') {
     return (
       <div>
-        {helpText}
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
             <Pie
@@ -252,7 +250,7 @@ const LicenseTypesChart: React.FC<LicenseTypesChartProps> = ({ data, visualizati
               ))}
             </Pie>
             <Legend content={<CustomLegend />} />
-            <Tooltip formatter={(value: any) => value.toLocaleString()} />
+            <Tooltip content={<CustomLicenseTooltip />} />
           </PieChart>
         </ResponsiveContainer>
       </div>

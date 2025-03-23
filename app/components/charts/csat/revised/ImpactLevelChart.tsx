@@ -15,6 +15,7 @@ import {
   Cell
 } from 'recharts';
 import { ChartProps } from '../types';
+import { StandardTooltip, numberFormatter } from '../../tooltips';
 
 interface ImpactLevelChartProps extends ChartProps {
   visualizationType?: 'bar' | 'pie' | 'donut';
@@ -53,7 +54,7 @@ export function ImpactLevelChart({ data, visualizationType = 'pie' }: ImpactLeve
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" />
           <YAxis />
-          <Tooltip formatter={(value) => [`${value} tickets`, 'Count']} />
+          <Tooltip content={<StandardTooltip formatter={numberFormatter} />} />
           <Legend />
           <Bar dataKey="value" name="Tickets">
             {chartData.map((entry, index) => (
@@ -85,7 +86,7 @@ export function ImpactLevelChart({ data, visualizationType = 'pie' }: ImpactLeve
               <Cell key={`cell-${index}`} fill={entry.color} />
             ))}
           </Pie>
-          <Tooltip formatter={(value) => [`${value} tickets`, 'Count']} />
+          <Tooltip content={<StandardTooltip formatter={numberFormatter} />} />
           <Legend />
         </PieChart>
       </ResponsiveContainer>
@@ -112,7 +113,7 @@ export function ImpactLevelChart({ data, visualizationType = 'pie' }: ImpactLeve
               <Cell key={`cell-${index}`} fill={entry.color} />
             ))}
           </Pie>
-          <Tooltip formatter={(value) => [`${value} tickets`, 'Count']} />
+          <Tooltip content={<StandardTooltip formatter={numberFormatter} />} />
           <Legend />
         </PieChart>
       </ResponsiveContainer>

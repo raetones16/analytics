@@ -16,6 +16,7 @@ import {
   Treemap
 } from 'recharts';
 import { ChartProps } from '../types';
+import { StandardTooltip, numberFormatter } from '../../tooltips';
 
 interface HelpTopicsChartProps extends ChartProps {
   visualizationType?: 'horizontalBar' | 'pie' | 'treemap';
@@ -64,7 +65,7 @@ export function HelpTopicsChart({ data, visualizationType = 'horizontalBar' }: H
             width={115}
             tick={{ fontSize: 12 }}
           />
-          <Tooltip formatter={(value) => [`${value} tickets`, 'Count']} />
+          <Tooltip content={<StandardTooltip formatter={numberFormatter} />} />
           <Legend />
           <Bar dataKey="count" name="Tickets" fill="#00C49F" />
         </BarChart>
@@ -92,7 +93,7 @@ export function HelpTopicsChart({ data, visualizationType = 'horizontalBar' }: H
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
-          <Tooltip formatter={(value) => [`${value} tickets`, 'Count']} />
+          <Tooltip content={<StandardTooltip formatter={numberFormatter} />} />
           <Legend />
         </PieChart>
       </ResponsiveContainer>

@@ -9,8 +9,8 @@ interface DateFilterProps {
 
 export function DateFilter({ value, onChange }: DateFilterProps) {
   return (
-    <div className="mb-6">
-      <label className="block text-sm font-medium text-gray-700 mb-1">
+    <div>
+      <label className="block font-medium text-gray-700 mb-1 text-right text-sm">
         Time Period
       </label>
       <div className="flex space-x-2">
@@ -54,7 +54,7 @@ function DateFilterButton({ label, selected, onClick }: DateFilterButtonProps) {
   return (
     <button
       onClick={onClick}
-      className={`px-4 py-2 text-sm font-medium rounded-md transition-colors 
+      className={`px-4 py-2 font-medium rounded-md transition-colors text-sm
         ${selected 
           ? 'bg-blue-600 text-white' 
           : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'

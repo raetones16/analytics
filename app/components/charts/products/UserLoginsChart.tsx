@@ -13,7 +13,8 @@ import {
   AreaChart,
   Area
 } from 'recharts';
-import { ChartProps, appColors, formatLargeNumber, tooltipFormatter } from './types';
+import { ChartProps, appColors, formatLargeNumber } from './types';
+import { StandardTooltip, numberFormatter } from '../tooltips';
 
 interface UserLoginsChartProps extends ChartProps {
   visualizationType?: 'bar' | 'line' | 'area';
@@ -25,7 +26,6 @@ const UserLoginsChart: React.FC<UserLoginsChartProps> = ({ data, visualizationTy
   const renderChart = () => {
     const commonProps = {
       data,
-      width: '100%',
       height: 300
     };
 
@@ -34,10 +34,7 @@ const UserLoginsChart: React.FC<UserLoginsChartProps> = ({ data, visualizationTy
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="displayDate" />
         <YAxis tickFormatter={(value) => formatLargeNumber(value)} />
-        <Tooltip 
-          labelFormatter={(value) => `Date: ${value}`}
-          formatter={tooltipFormatter}
-        />
+        <Tooltip content={<StandardTooltip formatter={numberFormatter} />} />
         <Legend />
       </>
     );
@@ -82,7 +79,7 @@ const UserLoginsChart: React.FC<UserLoginsChartProps> = ({ data, visualizationTy
   };
   
   return (
-    <div>
+    <div className="chart-container">
       <ResponsiveContainer width="100%" height={300}>
         {renderChart()}
       </ResponsiveContainer>

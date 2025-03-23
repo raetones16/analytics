@@ -122,7 +122,7 @@ const AverageOrderValueChart: React.FC<AverageOrderValueChartProps> = ({ data, v
                   className="recharts-legend-icon"
                 />
               </svg>
-              <span style={{ color: isActive ? '#666' : '#999' }}>{category.name}</span>
+              <span style={{ color: isActive ? '#666' : '#999', fontSize: '0.7rem' }}>{category.name}</span>
             </li>
           );
         })}
@@ -130,22 +130,14 @@ const AverageOrderValueChart: React.FC<AverageOrderValueChartProps> = ({ data, v
     );
   };
   
-  // Add a help text for clarity
-  const helpText = (
-    <p className="text-xs text-gray-500 mt-1 mb-2 text-center">
-      Click a legend item to focus on that category. Click again to show all categories.
-    </p>
-  );
-  
   // Render bar chart
   if (visualizationType === 'bar') {
     return (
       <div>
-        {helpText}
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
+            <XAxis dataKey="displayDate" />
             <YAxis tickFormatter={(value) => formatLargeNumber(value)} />
             <Tooltip content={<CustomAvgTooltip />} />
             <Legend content={<CustomLegend />} />
@@ -168,11 +160,10 @@ const AverageOrderValueChart: React.FC<AverageOrderValueChartProps> = ({ data, v
   if (visualizationType === 'line') {
     return (
       <div>
-        {helpText}
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
+            <XAxis dataKey="displayDate" />
             <YAxis tickFormatter={(value) => formatLargeNumber(value)} />
             <Tooltip content={<CustomAvgTooltip />} />
             <Legend content={<CustomLegend />} />
@@ -197,11 +188,10 @@ const AverageOrderValueChart: React.FC<AverageOrderValueChartProps> = ({ data, v
   if (visualizationType === 'area') {
     return (
       <div>
-        {helpText}
         <ResponsiveContainer width="100%" height={300}>
           <AreaChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
+            <XAxis dataKey="displayDate" />
             <YAxis tickFormatter={(value) => formatLargeNumber(value)} />
             <Tooltip content={<CustomAvgTooltip />} />
             <Legend content={<CustomLegend />} />

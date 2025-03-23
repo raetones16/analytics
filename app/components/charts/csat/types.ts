@@ -17,7 +17,7 @@ export interface CSATData {
   ticketTypes: {
     [key: string]: number;
   };
-  ticketsByGroup: {
+  ticketsByGroup?: {
     [key: string]: number;
   };
   _synthetic?: {

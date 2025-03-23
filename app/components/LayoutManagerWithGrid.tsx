@@ -151,29 +151,34 @@ export function LayoutManagerWithGrid({
   const getChartTitle = (child: React.ReactNode): string => {
     if (!React.isValidElement(child)) return 'Chart';
     
+    // Try to extract the ID, which is often descriptive
+    const id = child.props.id || '';
+    const readableId = id
+      .replace(/([A-Z])/g, ' $1') // Add space before capital letters
+      .replace(/^./, str => str.toUpperCase()) // Capitalize first letter
+      .trim(); // Cleanup extra spaces
+    
+    let title = readableId || 'Chart';
+    
+    // Also try to find the actual h3 title
     for (const c of React.Children.toArray(child.props.children)) {
       if (React.isValidElement(c) && 
           c.props && 
           typeof c.props === 'object' &&
           'className' in c.props && 
           typeof c.props.className === 'string' &&
-          c.props.className.includes('flex') && 
-          c.props.className.includes('items-center')) {
+          c.props.className.includes('flex')) {
         
         for (const tc of React.Children.toArray(c.props.children)) {
-          if (React.isValidElement(tc) && 
-              tc.props && 
-              typeof tc.props === 'object' &&
-              'className' in tc.props && 
-              typeof tc.props.className === 'string' &&
-              tc.props.className.includes('text-lg font-medium')) {
-            return tc.props.children || 'Chart';
+          // Look for an h3 element
+          if (React.isValidElement(tc) && tc.type === 'h3' && tc.props.children) {
+            return tc.props.children;
           }
         }
       }
     }
     
-    return 'Chart';
+    return title;
   };
 
   // Create a component that hides the visualization toggle
@@ -270,7 +275,7 @@ export function LayoutManagerWithGrid({
               >
                 {/* Control bar overlay */}
                 <div className="absolute top-0 right-0 left-0 bg-gray-50 bg-opacity-90 z-10 p-2 flex justify-between items-center border-b border-gray-200">
-                  <h3 className="text-gray-800 font-medium truncate">
+                  <h3 className="text-gray-800 text-md truncate">
                     {getChartTitle(child)}
                   </h3>
                   <button

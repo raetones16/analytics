@@ -14,7 +14,7 @@ import {
   Bar
 } from 'recharts';
 import { ChartProps, formatPercentage } from './types';
-import { percentageFormatter } from './tooltips';
+import { CustomPercentageTooltip } from './tooltips';
 
 interface ARRGrowthChartProps extends ChartProps {
   visualizationType?: 'line' | 'bar' | 'area';
@@ -26,16 +26,15 @@ const ARRGrowthChart: React.FC<ARRGrowthChartProps> = ({ data, visualizationType
   // Common chart properties
   const commonProps = {
     data,
-    width: '100%',
     height: 300
   };
   
   const commonAxisProps = (
     <>
       <CartesianGrid strokeDasharray="3 3" />
-      <XAxis dataKey="date" />
+      <XAxis dataKey="displayDate" />
       <YAxis tickFormatter={(value) => formatPercentage(value)} />
-      <Tooltip formatter={percentageFormatter} />
+      <Tooltip content={<CustomPercentageTooltip />} />
       <Legend />
     </>
   );

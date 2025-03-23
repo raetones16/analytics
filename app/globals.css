@@ -4,6 +4,39 @@
 
 /* Import react-grid-layout styles */
 @import './styles/react-grid-layout.css';
+
+/* Custom chart styles for the application */
+.recharts-default-legend,
+.recharts-legend-item-text,
+.recharts-text,
+.recharts-pie-label-text,
+.recharts-sector + text {
+  font-size: 0.7rem !important;
+}
+
+.recharts-tooltip-label,
+.recharts-tooltip-item-name,
+.recharts-tooltip-item-value,
+.recharts-default-tooltip {
+  font-size: 0.75rem !important;
+}
+
+/* Chart titles */
+.text-md {
+  font-size: 0.95rem !important;
+  font-weight: 600;
+  margin-bottom: 0;
+}
+
+/* Edit mode styles */
+.edit-chart-container {
+  margin-bottom: 1rem;
+}
+
+.edit-chart-container h3 {
+  font-size: 0.95rem !important;
+  font-weight: 600;
+}
  
 @layer base {
   :root {
@@ -75,5 +108,46 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-size: 14px; /* Base font size - reduced from 16px */
+  }
+
+  /* Typography scale in REM */
+  h1 {
+    font-size: 2.286rem; /* 32px at 14px base */
+    font-weight: 600; /* Semibold */
+    line-height: 1.2;
+  }
+  
+  h2 {
+    font-size: 1.714rem; /* 24px at 14px base */
+    font-weight: 600; /* Semibold */
+    line-height: 1.3;
+  }
+  
+  h3 {
+    font-size: 1.286rem; /* 18px at 14px base */
+    font-weight: 600; /* Semibold */
+    line-height: 1.4;
+  }
+  
+  h4 {
+    font-size: 1.143rem; /* 16px at 14px base */
+    font-weight: 600; /* Semibold */
+    line-height: 1.5;
+  }
+  
+  p, li, span, button, input, select, textarea {
+    font-size: 1rem; /* 14px - our base size */
+    line-height: 1.5;
+  }
+  
+  .text-sm {
+    font-size: 0.857rem; /* 12px at 14px base */
+    line-height: 1.5;
+  }
+  
+  .text-xs {
+    font-size: 0.714rem; /* 10px at 14px base */
+    line-height: 1.5;
   }
 }

@@ -116,7 +116,7 @@ const SalesByCategoryChart: React.FC<SalesByCategoryChartProps> = ({ data, visua
                   className="recharts-legend-icon"
                 />
               </svg>
-              <span style={{ color: isActive ? '#666' : '#999' }}>{category.name}</span>
+              <span style={{ color: isActive ? '#666' : '#999', fontSize: '0.7rem' }}>{category.name}</span>
             </li>
           );
         })}
@@ -126,7 +126,7 @@ const SalesByCategoryChart: React.FC<SalesByCategoryChartProps> = ({ data, visua
   
   // Get the most recent data point for pie/donut charts
   const latestData = data.length > 0 
-    ? data.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] 
+    ? data[data.length - 1]  // Data should already be sorted by date 
     : null;
   
   // Prepare pie data
@@ -143,24 +143,16 @@ const SalesByCategoryChart: React.FC<SalesByCategoryChartProps> = ({ data, visua
   
   const pieData = preparePieData();
   
-  // Add a help text for clarity
-  const helpText = (
-    <p className="text-xs text-gray-500 mt-1 mb-2 text-center">
-      Click a legend item to focus on that category. Click again to show all categories.
-    </p>
-  );
-  
   // Render bar chart
   if (visualizationType === 'bar') {
     return (
       <div>
-        {helpText}
         <ResponsiveContainer width="100%" height={300}>
           {data.length === 1 ? (
             // If we have only one data point, use non-stacked bars
             <BarChart data={data}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
+              <XAxis dataKey="displayDate" />
               <YAxis tickFormatter={(value) => formatLargeNumber(value)} />
               <Tooltip content={<CustomSalesTooltip />} />
               <Legend content={<CustomLegend />} />
@@ -178,7 +170,7 @@ const SalesByCategoryChart: React.FC<SalesByCategoryChartProps> = ({ data, visua
             // If we have multiple data points, use a stacked bar chart
             <BarChart data={data}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
+              <XAxis dataKey="displayDate" />
               <YAxis tickFormatter={(value) => formatLargeNumber(value)} />
               <Tooltip content={<CustomSalesTooltip />} />
               <Legend content={<CustomLegend />} />
@@ -203,7 +195,6 @@ const SalesByCategoryChart: React.FC<SalesByCategoryChartProps> = ({ data, visua
   if (visualizationType === 'pie') {
     return (
       <div>
-        {helpText}
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
             <Pie
@@ -238,7 +229,6 @@ const SalesByCategoryChart: React.FC<SalesByCategoryChartProps> = ({ data, visua
   if (visualizationType === 'donut') {
     return (
       <div>
-        {helpText}
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
             <Pie

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { CustomCountTooltip } from './tooltips';
 import { 
   BarChart, 
   Bar, 
@@ -119,7 +120,7 @@ const SalesCountChart: React.FC<SalesCountChartProps> = ({ data, visualizationTy
                   className="recharts-legend-icon"
                 />
               </svg>
-              <span style={{ color: isActive ? '#666' : '#999' }}>{category.name}</span>
+              <span style={{ color: isActive ? '#666' : '#999', fontSize: '0.7rem' }}>{category.name}</span>
             </li>
           );
         })}
@@ -127,24 +128,16 @@ const SalesCountChart: React.FC<SalesCountChartProps> = ({ data, visualizationTy
     );
   };
   
-  // Add a help text for clarity
-  const helpText = (
-    <p className="text-xs text-gray-500 mt-1 mb-2 text-center">
-      Click a legend item to focus on that category. Click again to show all categories.
-    </p>
-  );
-  
   // Render bar chart (unstacked)
   if (visualizationType === 'bar') {
     return (
       <div>
-        {helpText}
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
+            <XAxis dataKey="displayDate" />
             <YAxis />
-            <Tooltip />
+            <Tooltip content={<CustomCountTooltip />} />
             <Legend content={<CustomLegend />} />
             
             {visibleCategories.map((category) => (
@@ -165,13 +158,12 @@ const SalesCountChart: React.FC<SalesCountChartProps> = ({ data, visualizationTy
   if (visualizationType === 'stacked') {
     return (
       <div>
-        {helpText}
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
+            <XAxis dataKey="displayDate" />
             <YAxis />
-            <Tooltip />
+            <Tooltip content={<CustomCountTooltip />} />
             <Legend content={<CustomLegend />} />
             
             {visibleCategories.map((category) => (
@@ -193,13 +185,12 @@ const SalesCountChart: React.FC<SalesCountChartProps> = ({ data, visualizationTy
   if (visualizationType === 'line') {
     return (
       <div>
-        {helpText}
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
+            <XAxis dataKey="displayDate" />
             <YAxis />
-            <Tooltip />
+            <Tooltip content={<CustomCountTooltip />} />
             <Legend content={<CustomLegend />} />
             
             {visibleCategories.map((category) => (

@@ -14,7 +14,7 @@ import {
   Area
 } from 'recharts';
 import { ChartProps, categoryColors, formatLargeNumber, CategoryKey } from './types';
-import { currencyFormatter } from './tooltips';
+import { CustomSalesTooltip } from './tooltips';
 
 interface TotalSalesValueChartProps extends ChartProps {
   visualizationType?: 'line' | 'bar' | 'area';
@@ -133,7 +133,7 @@ const TotalSalesValueChart: React.FC<TotalSalesValueChartProps> = ({ data, visua
                   />
                 )}
               </svg>
-              <span style={{ color: isActive ? '#666' : '#999' }}>{category.name}</span>
+              <span style={{ color: isActive ? '#666' : '#999', fontSize: '0.7rem' }}>{category.name}</span>
             </li>
           );
         })}
@@ -141,24 +141,16 @@ const TotalSalesValueChart: React.FC<TotalSalesValueChartProps> = ({ data, visua
     );
   };
   
-  // Add a help text for clarity
-  const helpText = (
-    <p className="text-xs text-gray-500 mt-1 mb-2 text-center">
-      Click a legend item to focus on that category. Click again to show all categories.
-    </p>
-  );
-  
   // Render line chart
   if (visualizationType === 'line') {
     return (
       <div>
-        {helpText}
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
+            <XAxis dataKey="displayDate" />
             <YAxis tickFormatter={(value) => formatLargeNumber(value)} />
-            <Tooltip formatter={currencyFormatter} />
+            <Tooltip content={<CustomSalesTooltip />} />
             <Legend content={<CustomLegend />} />
             
             {visibleCategories.map((category) => (
@@ -181,13 +173,12 @@ const TotalSalesValueChart: React.FC<TotalSalesValueChartProps> = ({ data, visua
   if (visualizationType === 'bar') {
     return (
       <div>
-        {helpText}
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
+            <XAxis dataKey="displayDate" />
             <YAxis tickFormatter={(value) => formatLargeNumber(value)} />
-            <Tooltip formatter={currencyFormatter} />
+            <Tooltip content={<CustomSalesTooltip />} />
             <Legend content={<CustomLegend />} />
             
             {visibleCategories.map((category) => (
@@ -209,13 +200,12 @@ const TotalSalesValueChart: React.FC<TotalSalesValueChartProps> = ({ data, visua
   if (visualizationType === 'area') {
     return (
       <div>
-        {helpText}
         <ResponsiveContainer width="100%" height={300}>
           <AreaChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
+            <XAxis dataKey="displayDate" />
             <YAxis tickFormatter={(value) => formatLargeNumber(value)} />
-            <Tooltip formatter={currencyFormatter} />
+            <Tooltip content={<CustomSalesTooltip />} />
             <Legend content={<CustomLegend />} />
             
             {visibleCategories.map((category) => (
