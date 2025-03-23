@@ -155,7 +155,7 @@ export function LayoutManagerWithGrid({
     const id = child.props.id || '';
     const readableId = id
       .replace(/([A-Z])/g, ' $1') // Add space before capital letters
-      .replace(/^./, str => str.toUpperCase()) // Capitalize first letter
+      .replace(/^./, (str: string) => str.toUpperCase()) // Capitalize first letter
       .trim(); // Cleanup extra spaces
     
     let title = readableId || 'Chart';

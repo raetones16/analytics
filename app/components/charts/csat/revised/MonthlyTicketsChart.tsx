@@ -26,7 +26,7 @@ export function MonthlyTicketsChart({ data, visualizationType = 'line' }: Monthl
   // Format data for the chart
   const chartData = data
     .map(item => ({
-      month: item.displayDate || formatDateForDisplay(new Date(item.date)),
+      month: formatDateForDisplay(new Date(item.date)),
       tickets: item.totalTickets
     }));
 

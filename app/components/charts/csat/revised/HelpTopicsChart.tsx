@@ -48,6 +48,54 @@ export function HelpTopicsChart({ data, visualizationType = 'horizontalBar' }: H
     '#82ca9d', '#ffc658', '#8dd1e1', '#a4de6c', '#d0ed57'
   ];
 
+  // Create a custom content component for the Treemap
+  const CustomTreemapContent = (props: any) => {
+    const { x, y, width, height, index } = props;
+    // Only render if space is sufficient for readable text
+    const isLabelVisible = width > 30 && height > 20;
+    const item = chartData[index];
+    
+    return (
+      <g>
+        <rect
+          x={x}
+          y={y}
+          width={width}
+          height={height}
+          style={{
+            fill: COLORS[index % COLORS.length],
+            stroke: '#fff',
+            strokeWidth: 2,
+            strokeOpacity: 1,
+          }}
+        />
+        {isLabelVisible && (
+          <>
+            <text
+              x={x + width / 2}
+              y={y + height / 2 - 8}
+              textAnchor="middle"
+              fill="#fff"
+              fontSize={12}
+              fontWeight="bold"
+            >
+              {item.topic}
+            </text>
+            <text
+              x={x + width / 2}
+              y={y + height / 2 + 8}
+              textAnchor="middle"
+              fill="#fff"
+              fontSize={10}
+            >
+              {item.count} tickets
+            </text>
+          </>
+        )}
+      </g>
+    );
+  };
+
   // Render horizontal bar chart
   if (visualizationType === 'horizontalBar') {
     return (
@@ -100,7 +148,7 @@ export function HelpTopicsChart({ data, visualizationType = 'horizontalBar' }: H
     );
   }
 
-  // Render treemap with improved labels
+  // Render treemap
   if (visualizationType === 'treemap') {
     return (
       <ResponsiveContainer width="100%" height={500}>
@@ -111,51 +159,7 @@ export function HelpTopicsChart({ data, visualizationType = 'horizontalBar' }: H
           aspectRatio={4/3}
           stroke="#fff"
           fill="#8884d8"
-          // Add content label to show topic name and count
-          content={({ root, depth, x, y, width, height, index, payload, colors, rank, name }) => {
-            // Only render if space is sufficient for readable text
-            const isLabelVisible = width > 30 && height > 20;
-            const item = chartData[index];
-            return (
-              <g>
-                <rect
-                  x={x}
-                  y={y}
-                  width={width}
-                  height={height}
-                  style={{
-                    fill: COLORS[index % COLORS.length],
-                    stroke: '#fff',
-                    strokeWidth: 2 / (depth + 1e-10),
-                    strokeOpacity: 1 / (depth + 1e-10),
-                  }}
-                />
-                {isLabelVisible && (
-                  <>
-                    <text
-                      x={x + width / 2}
-                      y={y + height / 2 - 8}
-                      textAnchor="middle"
-                      fill="#fff"
-                      fontSize={12}
-                      fontWeight="bold"
-                    >
-                      {item.topic}
-                    </text>
-                    <text
-                      x={x + width / 2}
-                      y={y + height / 2 + 8}
-                      textAnchor="middle"
-                      fill="#fff"
-                      fontSize={10}
-                    >
-                      {item.count} tickets
-                    </text>
-                  </>
-                )}
-              </g>
-            );
-          }}
+          content={<CustomTreemapContent />}
         >
           {chartData.map((entry, index) => (
             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

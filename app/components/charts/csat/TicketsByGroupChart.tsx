@@ -20,9 +20,11 @@ export function TicketsByGroupChart({ data }: ChartProps) {
   }
   
   // Prepare data for the chart - sort by count descending
-  const chartData = Object.entries(latestData.ticketsByGroup)
-    .map(([group, count]) => ({ name: group, value: count }))
-    .sort((a, b) => b.value - a.value);
+  const chartData = latestData.ticketsByGroup
+    ? Object.entries(latestData.ticketsByGroup)
+      .map(([group, count]) => ({ name: group, value: count }))
+      .sort((a, b) => b.value - a.value)
+    : [];
   
   return (
     <div className="h-72">
