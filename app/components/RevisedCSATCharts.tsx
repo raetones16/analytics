@@ -149,7 +149,7 @@ export function RevisedCSATCharts({ data, dateRange }: CSATChartsProps) {
         {dateRange !== 'month' && (
           <div 
             id="monthlyTickets" 
-            className="bg-white p-4 rounded-lg shadow-md mb-6 relative"
+            className="bg-white p-4 rounded-lg shadow-md relative"
             onMouseEnter={() => setHoveredChart('monthlyTickets')}
             onMouseLeave={() => setHoveredChart(null)}
           >
@@ -178,7 +178,7 @@ export function RevisedCSATCharts({ data, dateRange }: CSATChartsProps) {
         {/* Help Topics Chart */}
         <div 
           id="helpTopics" 
-          className="bg-white p-4 rounded-lg shadow-md mb-6 relative"
+          className="bg-white p-4 rounded-lg shadow-md relative"
           onMouseEnter={() => setHoveredChart('helpTopics')}
           onMouseLeave={() => setHoveredChart(null)}
         >
@@ -206,7 +206,7 @@ export function RevisedCSATCharts({ data, dateRange }: CSATChartsProps) {
         {/* Impact Level Chart */}
         <div 
           id="impactLevel" 
-          className="bg-white p-4 rounded-lg shadow-md mb-6 relative"
+          className="bg-white p-4 rounded-lg shadow-md relative"
           onMouseEnter={() => setHoveredChart('impactLevel')}
           onMouseLeave={() => setHoveredChart(null)}
         >
@@ -234,7 +234,7 @@ export function RevisedCSATCharts({ data, dateRange }: CSATChartsProps) {
         {/* Ticket Types Chart */}
         <div 
           id="ticketTypes" 
-          className="bg-white p-4 rounded-lg shadow-md mb-6 relative"
+          className="bg-white p-4 rounded-lg shadow-md relative"
           onMouseEnter={() => setHoveredChart('ticketTypes')}
           onMouseLeave={() => setHoveredChart(null)}
         >

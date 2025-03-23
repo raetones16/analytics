@@ -99,7 +99,7 @@ export function HelpTopicsChart({ data, visualizationType = 'horizontalBar' }: H
   // Render horizontal bar chart
   if (visualizationType === 'horizontalBar') {
     return (
-      <ResponsiveContainer width="100%" height={500}>
+      <ResponsiveContainer width="100%" height={400}>
         <BarChart
           data={chartData}
           layout="vertical"
@@ -124,7 +124,7 @@ export function HelpTopicsChart({ data, visualizationType = 'horizontalBar' }: H
   // Render pie chart
   if (visualizationType === 'pie') {
     return (
-      <ResponsiveContainer width="100%" height={500}>
+      <ResponsiveContainer width="100%" height={400}>
         <PieChart>
           <Pie
             data={chartData}
@@ -151,7 +151,7 @@ export function HelpTopicsChart({ data, visualizationType = 'horizontalBar' }: H
   // Render treemap
   if (visualizationType === 'treemap') {
     return (
-      <ResponsiveContainer width="100%" height={500}>
+      <ResponsiveContainer width="100%" height={400}>
         <Treemap
           data={chartData}
           dataKey="value"
