@@ -12,37 +12,37 @@ export const chartColors = {
   muted: getTailwindColor('grey-40'),         // Muted text/borders - Grey L43
   background: getTailwindColor('grey-100'),   // Background color - Grey L96
   foreground: getTailwindColor('grey-10'),    // Text color - Grey L10
-  destructive: getTailwindColor('rose-50'),   // Error/destructive color - Rose L45
+  destructive: getTailwindColor('rose-60'),   // Updated to Rose L60 (was L45) - Error/destructive
 };
 
 // Standardized chart color palette - numbered for easy reference using brand colors
 export const chartPalette = {
   color1: getTailwindColor('blue-50'),      // Blue L45 - Primary brand color
-  color2: getTailwindColor('teal-50'),      // Teal L45 - Accent color
-  color3: getTailwindColor('green-50'),     // Green L45 - Success/positive color
-  color4: getTailwindColor('orange-70'),    // Orange L65 - Warning/neutral color
-  color5: getTailwindColor('orange-50'),    // Orange L45 - Caution color
-  color6: getTailwindColor('rose-50'),      // Rose L45 - Error/negative color
-  color7: getTailwindColor('purple-50'),    // Purple L45 - Additional color
-  color8: getTailwindColor('teal-60'),      // Teal L55 - Additional color (slightly brighter)
-  color9: getTailwindColor('blue-60'),      // Blue L55 - Additional color (slightly brighter)
-  color10: getTailwindColor('purple-60'),   // Purple L55 - Additional color (slightly brighter)
+  color2: getTailwindColor('rose-60'),      // Rose L60 - Now second color for better distinction
+  color3: getTailwindColor('orange-70'),    // Orange L65 - Third color
+  color4: getTailwindColor('teal-50'),      // Teal L45 - Moved from second to fourth position
+  color5: getTailwindColor('purple-60'),    // Purple L60 - Fifth color
+  color6: getTailwindColor('green-50'),     // Green L45 - Moved from third to sixth position
+  color7: getTailwindColor('grey-50'),      // Grey L50 - Seventh color (new addition)
+  color8: getTailwindColor('blue-70'),      // Blue L70 - Eighth color (different shade of blue)
+  color9: getTailwindColor('orange-50'),    // Orange L50 - Ninth color (different shade of orange)
+  color10: getTailwindColor('teal-70'),     // Teal L70 - Tenth color (different shade of teal)
 };
 
 // Color schemes for different chart types - using edays brand colors
 export const chartColorSchemes = {
   // For bar charts, area charts, etc.
   categorical: [
-    chartPalette.color1,
-    chartPalette.color2,
-    chartPalette.color3,
-    chartPalette.color4,
-    chartPalette.color5,
-    chartPalette.color6,
-    chartPalette.color7,
-    chartPalette.color8,
-    chartPalette.color9,
-    chartPalette.color10,
+    chartPalette.color1, // Blue 50
+    chartPalette.color2, // Rose 60
+    chartPalette.color3, // Orange 70
+    chartPalette.color4, // Teal 50
+    chartPalette.color5, // Purple 60
+    chartPalette.color6, // Green 50
+    chartPalette.color7, // Grey 50
+    chartPalette.color8, // Blue 70
+    chartPalette.color9, // Orange 50
+    chartPalette.color10, // Teal 70
   ],
   
   // For sequential data (low to high)
@@ -56,10 +56,10 @@ export const chartColorSchemes = {
   
   // For diverging data (negative to positive)
   diverging: [
-    getTailwindColor('rose-50'),     // Rose L45 (negative)
-    getTailwindColor('orange-50'),    // Orange L45
-    getTailwindColor('orange-70'),    // Orange L65 (neutral)
-    getTailwindColor('green-60'),     // Green L55 
+    getTailwindColor('rose-60'),     // Rose L60 (negative)
+    getTailwindColor('orange-50'),    // Orange L50
+    getTailwindColor('grey-50'),     // Grey L50 (neutral) - changed from duplicate orange
+    getTailwindColor('teal-50'),     // Teal L50 - changed from green 
     getTailwindColor('green-50'),     // Green L45 (positive)
   ],
 
@@ -110,17 +110,17 @@ export const appColorsMapped = {
 export const categoryColorsMapped = {
   newDirect: getTailwindColor('blue-50'),      // Blue L45 (primary)
   newPartner: getTailwindColor('teal-50'),     // Teal L45 (accent)
-  existingClient: getTailwindColor('orange-60'), // Orange L55 
-  existingPartner: getTailwindColor('purple-50'), // Purple L45
-  selfService: getTailwindColor('orange-50'),    // Orange L45
+  existingClient: getTailwindColor('orange-70'), // Orange L70
+  existingPartner: getTailwindColor('rose-60'), // Rose L60
+  selfService: getTailwindColor('purple-60'),   // Purple L60 (was orange-70)
 };
 
 // Map severity colors to standard palette with semantic meanings
 export const severityColorsMapped = {
   low: getTailwindColor('green-50'),      // Green L45 (Success)
   medium: getTailwindColor('orange-70'),  // Orange L65 (Warning)
-  high: getTailwindColor('orange-50'),    // Orange L45 (Caution)
-  urgent: getTailwindColor('rose-50'),    // Rose L45 (Danger)
+  high: getTailwindColor('orange-50'),    // Orange L50 - Changed to avoid duplicate
+  urgent: getTailwindColor('rose-60'),    // Rose L60 (Danger)
 };
 
 // Default color array for charts that need it (like pie charts)

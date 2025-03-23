@@ -18,16 +18,16 @@ const textColors = {
     value: 'text-blue-20'
   },
   churn: {
-    heading: 'text-rose-30',
-    value: 'text-rose-20'
+    heading: 'text-rose-60',
+    value: 'text-rose-30'
   },
   tickets: {
     heading: 'text-green-30',
     value: 'text-green-20'
   },
   urgent: {
-    heading: 'text-orange-30',
-    value: 'text-orange-20'
+    heading: 'text-orange-70',
+    value: 'text-orange-40'
   }
 };
 

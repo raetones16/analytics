@@ -22,7 +22,7 @@ const ChurnRateChart: React.FC<ChartProps> = ({ data }) => {
             type="monotone" 
             dataKey="churnPercentage" 
             name="Churn Rate" 
-            stroke={getTailwindColor('rose-50')} 
+            stroke={getTailwindColor('rose-60')} 
             activeDot={{ r: 8 }} 
           />
         </LineChart>
