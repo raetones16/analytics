@@ -17,6 +17,7 @@ import {
 import { ChartProps } from '../types';
 import { formatDateForDisplay } from '../../../../utils/date-utils';
 import { StandardTooltip, numberFormatter } from '../../tooltips';
+import { chartPalette } from '../../../../utils/theme';
 
 interface MonthlyTicketsChartProps extends ChartProps {
   visualizationType?: 'line' | 'bar' | 'area';
@@ -54,7 +55,7 @@ export function MonthlyTicketsChart({ data, visualizationType = 'line' }: Monthl
           <Line 
             type="monotone" 
             dataKey="tickets" 
-            stroke="#8884d8" 
+            stroke={chartPalette.color1} 
             activeDot={{ r: 8 }}
             name="Total Tickets"
           />
@@ -80,7 +81,7 @@ export function MonthlyTicketsChart({ data, visualizationType = 'line' }: Monthl
           />
           <YAxis />
           <Tooltip content={<StandardTooltip formatter={numberFormatter} />} />
-          <Bar dataKey="tickets" fill="#8884d8" name="Total Tickets" />
+          <Bar dataKey="tickets" fill={chartPalette.color1} name="Total Tickets" />
         </BarChart>
       </ResponsiveContainer>
     );
@@ -106,8 +107,8 @@ export function MonthlyTicketsChart({ data, visualizationType = 'line' }: Monthl
           <Area 
             type="monotone" 
             dataKey="tickets" 
-            stroke="#8884d8" 
-            fill="#8884d8" 
+            stroke={chartPalette.color1} 
+            fill={chartPalette.color1} 
             fillOpacity={0.3}
             name="Total Tickets"
           />

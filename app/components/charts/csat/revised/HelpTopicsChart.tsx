@@ -17,6 +17,7 @@ import {
 } from 'recharts';
 import { ChartProps } from '../types';
 import { StandardTooltip, numberFormatter } from '../../tooltips';
+import { chartPalette, chartColorSchemes } from '../../../../utils/theme';
 
 interface HelpTopicsChartProps extends ChartProps {
   visualizationType?: 'horizontalBar' | 'pie' | 'treemap';
@@ -43,10 +44,7 @@ export function HelpTopicsChart({ data, visualizationType = 'horizontalBar' }: H
     .slice(0, 10); // Limit to top 10 for better readability
   
   // Colors for pie chart and treemap
-  const COLORS = [
-    '#00C49F', '#0088FE', '#FFBB28', '#FF8042', '#8884d8', 
-    '#82ca9d', '#ffc658', '#8dd1e1', '#a4de6c', '#d0ed57'
-  ];
+  const COLORS = chartColorSchemes.categorical;
 
   // Create a custom content component for the Treemap
   const CustomTreemapContent = (props: any) => {
@@ -115,7 +113,7 @@ export function HelpTopicsChart({ data, visualizationType = 'horizontalBar' }: H
           />
           <Tooltip content={<StandardTooltip formatter={numberFormatter} />} />
           <Legend />
-          <Bar dataKey="count" name="Tickets" fill="#00C49F" />
+          <Bar dataKey="count" name="Tickets" fill={chartPalette.color3} />
         </BarChart>
       </ResponsiveContainer>
     );

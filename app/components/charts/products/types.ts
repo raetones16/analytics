@@ -20,11 +20,11 @@ export interface ChartProps {
   data: ProductUsageData[];
 }
 
-// Common color scheme
-export const appColors = {
-  web: "#8884d8",   // Purple for web app
-  mobile: "#82ca9d" // Green for mobile app
-};
+// Import colors from the global theme system
+import { appColorsMapped } from '../../../utils/theme';
+
+// Re-export the app colors for consistency
+export const appColors = appColorsMapped;
 
 // Format large numbers with K/M abbreviations
 export const formatLargeNumber = (value: number): string => {

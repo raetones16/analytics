@@ -3,6 +3,7 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { ChartProps, COLORS } from './types';
+import { chartColors } from '../../../utils/theme';
 
 export function TicketsByGroupChart({ data }: ChartProps) {
   // Get the latest data point
@@ -40,7 +41,7 @@ export function TicketsByGroupChart({ data }: ChartProps) {
           <YAxis dataKey="name" type="category" />
           <Tooltip formatter={(value) => [`${value} tickets`, 'Count']} />
           <Legend />
-          <Bar dataKey="value" fill="#8884d8" name="Tickets" />
+          <Bar dataKey="value" fill={chartColors.primary} name="Tickets" />
         </BarChart>
       </ResponsiveContainer>
     </div>

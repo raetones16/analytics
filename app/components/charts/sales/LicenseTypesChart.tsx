@@ -14,6 +14,7 @@ import {
   Cell
 } from 'recharts';
 import { ChartProps, formatLargeNumber } from './types';
+import { chartColorSchemes } from '../../../utils/theme';
 
 // License type key for filtering
 type LicenseTypeKey = 'user' | 'leaver' | 'timesheet' | 'directory' | 'workflow' | 'other';
@@ -34,37 +35,37 @@ const LicenseTypesChart: React.FC<LicenseTypesChartProps> = ({ data, visualizati
     { 
       dataKey: "userLicensesCount", 
       name: "User Licenses", 
-      fill: "#8884d8",
+      fill: chartColorSchemes.categorical[0],
       typeKey: 'user' as LicenseTypeKey
     },
     { 
       dataKey: "leaverLicensesCount", 
       name: "Leaver Licenses", 
-      fill: "#82ca9d",
+      fill: chartColorSchemes.categorical[1],
       typeKey: 'leaver' as LicenseTypeKey
     },
     { 
       dataKey: "timesheetLicensesCount", 
       name: "Timesheet Licenses", 
-      fill: "#ffc658",
+      fill: chartColorSchemes.categorical[2],
       typeKey: 'timesheet' as LicenseTypeKey
     },
     { 
       dataKey: "directoryLicensesCount", 
       name: "Directory Licenses", 
-      fill: "#ff8042",
+      fill: chartColorSchemes.categorical[3],
       typeKey: 'directory' as LicenseTypeKey
     },
     { 
       dataKey: "workflowLicensesCount", 
       name: "Workflow Licenses", 
-      fill: "#e65100",
+      fill: chartColorSchemes.categorical[4],
       typeKey: 'workflow' as LicenseTypeKey
     },
     { 
       dataKey: "otherLicensesCount", 
       name: "Other Licenses", 
-      fill: "#9e9e9e",
+      fill: chartColorSchemes.categorical[5] || '#9e9e9e',
       typeKey: 'other' as LicenseTypeKey
     }
   ];

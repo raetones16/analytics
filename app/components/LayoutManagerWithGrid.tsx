@@ -226,24 +226,24 @@ export function LayoutManagerWithGrid({
   // Edit mode - uses the exact same grid layout as the normal mode
   return (
     <div>
-      <div className="bg-blue-50 p-4 mb-6 rounded-lg border border-blue-200">
+      <div className="bg-blue-90 p-4 mb-6 rounded-lg border border-blue-70">
         <div className="flex justify-between items-center">
           <div>
-            <p className="text-blue-800 font-semibold">Layout Edit Mode</p>
-            <p className="text-blue-600 text-sm mt-1">
+            <p className="text-blue-30 font-semibold">Layout Edit Mode</p>
+            <p className="text-blue-40 text-sm mt-1">
               Drag charts to reorder or toggle between full/half width
             </p>
           </div>
           <div className="space-x-2">
             <button
               onClick={handleCancel}
-              className="px-4 py-2 bg-white text-gray-700 rounded border border-gray-300 hover:bg-gray-50 transition-colors shadow-sm"
+              className="px-4 py-2 bg-white text-grey-40 rounded border border-grey-70 hover:bg-grey-90 transition-colors shadow-sm"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors shadow-sm"
+              className="px-4 py-2 bg-blue-50 text-white rounded hover:bg-blue-40 transition-colors shadow-sm"
             >
               Save Layout
             </button>
@@ -274,8 +274,8 @@ export function LayoutManagerWithGrid({
                 onDrop={(e) => handleDrop(e, item.id)}
               >
                 {/* Control bar overlay */}
-                <div className="absolute top-0 right-0 left-0 bg-gray-50 bg-opacity-90 z-10 p-2 flex justify-between items-center border-b border-gray-200">
-                  <h3 className="text-gray-800 text-md truncate">
+                <div className="absolute top-0 right-0 left-0 bg-grey-90 bg-opacity-90 z-10 p-2 flex justify-between items-center border-b border-grey-70">
+                  <h3 className="text-grey-30 text-md truncate">
                     {getChartTitle(child)}
                   </h3>
                   <button
@@ -283,8 +283,8 @@ export function LayoutManagerWithGrid({
                     className={`
                       px-3 py-1 text-xs font-medium rounded transition-colors shadow-sm
                       ${item.width === 'half' 
-                        ? 'bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100' 
-                        : 'bg-blue-100 text-blue-700 border border-blue-300 hover:bg-blue-200'}
+                        ? 'bg-blue-90 text-blue-30 border border-blue-70 hover:bg-blue-80' 
+                        : 'bg-blue-80 text-blue-40 border border-blue-60 hover:bg-blue-70'}
                     `}
                   >
                     {item.width === 'half' ? 'Make Full Width' : 'Make Half Width'}
@@ -292,7 +292,7 @@ export function LayoutManagerWithGrid({
                 </div>
 
                 {/* Chart content with grab handle */}
-                <div className="pt-10 relative border-2 border-dashed border-gray-300 rounded-lg cursor-grab bg-white">
+                <div className="pt-10 relative border-2 border-dashed border-grey-70 rounded-lg cursor-grab bg-white">
                   {/* Hide the original toggle in edit mode */}
                   {React.isValidElement(child) && (
                     <div className="p-4">

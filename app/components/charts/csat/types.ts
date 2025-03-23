@@ -42,8 +42,10 @@ export type ImpactLevelVisualizationType = 'bar' | 'pie' | 'donut';
 export type TicketTypesVisualizationType = 'horizontalBar' | 'pie' | 'donut';
 export type MonthlyTicketsVisualizationType = 'line' | 'bar' | 'area';
 
-// Colors for charts
-export const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+import { COLORS_MAPPED } from '../../../utils/theme';
+
+// Colors for charts - uses theme colors
+export const COLORS = COLORS_MAPPED;
 
 // Prepare data for the tickets by severity pie chart
 export const prepareSeverityData = (latestData: CSATData | null) => {

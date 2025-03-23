@@ -16,6 +16,7 @@ import {
 } from 'recharts';
 import { ChartProps } from '../types';
 import { StandardTooltip, numberFormatter } from '../../tooltips';
+import { chartPalette, chartColorSchemes } from '../../../../utils/theme';
 
 interface TicketTypesChartProps extends ChartProps {
   visualizationType?: 'horizontalBar' | 'pie' | 'donut';
@@ -41,10 +42,7 @@ export function TicketTypesChart({ data, visualizationType = 'horizontalBar' }: 
     .sort((a, b) => b.count - a.count);
   
   // Colors for pie chart
-  const COLORS = [
-    '#FFBB28', '#FF8042', '#0088FE', '#00C49F', '#8884d8', 
-    '#82ca9d', '#ffc658', '#8dd1e1', '#a4de6c', '#d0ed57'
-  ];
+  const COLORS = chartColorSchemes.categorical;
 
   // Render horizontal bar chart
   if (visualizationType === 'horizontalBar') {
@@ -65,7 +63,7 @@ export function TicketTypesChart({ data, visualizationType = 'horizontalBar' }: 
           />
           <Tooltip content={<StandardTooltip formatter={numberFormatter} />} />
           <Legend />
-          <Bar dataKey="count" name="Tickets" fill="#FFBB28" />
+          <Bar dataKey="count" name="Tickets" fill={chartPalette.color2} />
         </BarChart>
       </ResponsiveContainer>
     );

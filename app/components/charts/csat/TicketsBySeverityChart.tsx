@@ -2,7 +2,8 @@
 
 import React from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { ChartProps, COLORS, prepareSeverityData } from './types';
+import { ChartProps, prepareSeverityData } from './types';
+import { severityColorsMapped } from '../../../utils/theme';
 
 const TicketsBySeverityChart: React.FC<ChartProps> = ({ data }) => {
   if (data.length === 0) return null;
@@ -25,8 +26,11 @@ const TicketsBySeverityChart: React.FC<ChartProps> = ({ data }) => {
             dataKey="value"
             label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
           >
-            {severityData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            {severityData.map((entry) => (
+              <Cell 
+                key={`cell-${entry.name}`} 
+                fill={severityColorsMapped[entry.name.toLowerCase() as keyof typeof severityColorsMapped]} 
+              />
             ))}
           </Pie>
           <Tooltip formatter={(value) => Number(value)} />

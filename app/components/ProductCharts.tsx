@@ -147,8 +147,8 @@ export function ProductCharts({ data }: ProductChartsProps) {
         <div 
           id="userLogins" 
           className="bg-white p-4 rounded-lg shadow-md relative" 
-          onMouseEnter={() => setHoveredChart('userLogins')} 
-          onMouseLeave={() => setHoveredChart(null)}
+          onMouseEnter={() => !isEditingLayout && setHoveredChart('userLogins')} 
+          onMouseLeave={() => !isEditingLayout && setHoveredChart(null)}
         >
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-md">User Logins</h3>
@@ -175,8 +175,8 @@ export function ProductCharts({ data }: ProductChartsProps) {
         <div 
           id="absencesBooked" 
           className="bg-white p-4 rounded-lg shadow-md relative" 
-          onMouseEnter={() => setHoveredChart('absencesBooked')} 
-          onMouseLeave={() => setHoveredChart(null)}
+          onMouseEnter={() => !isEditingLayout && setHoveredChart('absencesBooked')} 
+          onMouseLeave={() => !isEditingLayout && setHoveredChart(null)}
         >
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-md">Absences Booked</h3>
@@ -203,8 +203,8 @@ export function ProductCharts({ data }: ProductChartsProps) {
         <div 
           id="timesheetsSubmitted" 
           className="bg-white p-4 rounded-lg shadow-md relative" 
-          onMouseEnter={() => setHoveredChart('timesheetsSubmitted')} 
-          onMouseLeave={() => setHoveredChart(null)}
+          onMouseEnter={() => !isEditingLayout && setHoveredChart('timesheetsSubmitted')} 
+          onMouseLeave={() => !isEditingLayout && setHoveredChart(null)}
         >
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-md">Timesheets Submitted</h3>
@@ -231,8 +231,8 @@ export function ProductCharts({ data }: ProductChartsProps) {
         <div 
           id="workflowsCreated" 
           className="bg-white p-4 rounded-lg shadow-md relative" 
-          onMouseEnter={() => setHoveredChart('workflowsCreated')} 
-          onMouseLeave={() => setHoveredChart(null)}
+          onMouseEnter={() => !isEditingLayout && setHoveredChart('workflowsCreated')} 
+          onMouseLeave={() => !isEditingLayout && setHoveredChart(null)}
         >
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-md">Workflows Created</h3>

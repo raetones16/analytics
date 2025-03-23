@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { uiColors } from '../utils/theme';
 
 export interface VisualizationOption {
   value: string;
@@ -29,8 +30,8 @@ export function VisualizationToggle({
             key={option.value}
             className={`px-3 py-1 text-sm ${
               current === option.value 
-                ? 'bg-blue-100 text-blue-700' 
-                : 'text-gray-600 hover:bg-gray-50'
+                ? `${uiColors.primary.bgLight} ${uiColors.primary.text}` 
+                : `${uiColors.default.text} hover:bg-gray-50`
             }`}
             onClick={() => onChange(chartName, option.value)}
           >

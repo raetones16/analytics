@@ -165,8 +165,8 @@ export function SalesCharts({ data }: SalesChartsProps) {
         <div 
           id="salesByCategory" 
           className="bg-white p-4 rounded-lg shadow-md relative"
-          onMouseEnter={() => setHoveredChart('salesByCategory')}
-          onMouseLeave={() => setHoveredChart(null)}
+          onMouseEnter={() => !isEditingLayout && setHoveredChart('salesByCategory')}
+          onMouseLeave={() => !isEditingLayout && setHoveredChart(null)}
         >
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-md">Sales by Category</h3>
@@ -193,8 +193,8 @@ export function SalesCharts({ data }: SalesChartsProps) {
         <div 
           id="averageOrderValue" 
           className="bg-white p-4 rounded-lg shadow-md relative"
-          onMouseEnter={() => setHoveredChart('averageOrderValue')}
-          onMouseLeave={() => setHoveredChart(null)}
+          onMouseEnter={() => !isEditingLayout && setHoveredChart('averageOrderValue')}
+          onMouseLeave={() => !isEditingLayout && setHoveredChart(null)}
         >
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-md">Average Order Value</h3>
@@ -221,8 +221,8 @@ export function SalesCharts({ data }: SalesChartsProps) {
         <div 
           id="arrGrowth" 
           className="bg-white p-4 rounded-lg shadow-md relative"
-          onMouseEnter={() => setHoveredChart('arrGrowth')}
-          onMouseLeave={() => setHoveredChart(null)}
+          onMouseEnter={() => !isEditingLayout && setHoveredChart('arrGrowth')}
+          onMouseLeave={() => !isEditingLayout && setHoveredChart(null)}
         >
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-md">ARR Growth</h3>
@@ -249,8 +249,8 @@ export function SalesCharts({ data }: SalesChartsProps) {
         <div 
           id="licenseTypes" 
           className="bg-white p-4 rounded-lg shadow-md relative"
-          onMouseEnter={() => setHoveredChart('licenseTypes')}
-          onMouseLeave={() => setHoveredChart(null)}
+          onMouseEnter={() => !isEditingLayout && setHoveredChart('licenseTypes')}
+          onMouseLeave={() => !isEditingLayout && setHoveredChart(null)}
         >
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-md">License Types</h3>
@@ -277,8 +277,8 @@ export function SalesCharts({ data }: SalesChartsProps) {
         <div 
           id="salesCount" 
           className="bg-white p-4 rounded-lg shadow-md relative"
-          onMouseEnter={() => setHoveredChart('salesCount')}
-          onMouseLeave={() => setHoveredChart(null)}
+          onMouseEnter={() => !isEditingLayout && setHoveredChart('salesCount')}
+          onMouseLeave={() => !isEditingLayout && setHoveredChart(null)}
         >
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-md">Sales Count</h3>
@@ -305,8 +305,8 @@ export function SalesCharts({ data }: SalesChartsProps) {
         <div 
           id="totalSalesValue" 
           className="bg-white p-4 rounded-lg shadow-md relative"
-          onMouseEnter={() => setHoveredChart('totalSalesValue')}
-          onMouseLeave={() => setHoveredChart(null)}
+          onMouseEnter={() => !isEditingLayout && setHoveredChart('totalSalesValue')}
+          onMouseLeave={() => !isEditingLayout && setHoveredChart(null)}
         >
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-md">Total Sales Value</h3>

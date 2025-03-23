@@ -150,8 +150,8 @@ export function RevisedCSATCharts({ data, dateRange }: CSATChartsProps) {
           <div 
             id="monthlyTickets" 
             className="bg-white p-4 rounded-lg shadow-md relative"
-            onMouseEnter={() => setHoveredChart('monthlyTickets')}
-            onMouseLeave={() => setHoveredChart(null)}
+            onMouseEnter={() => !isEditingLayout && setHoveredChart('monthlyTickets')}
+            onMouseLeave={() => !isEditingLayout && setHoveredChart(null)}
           >
             <div className="flex justify-between items-center mb-3">
               <h3 className="text-md">Monthly Ticket Volume</h3>
@@ -179,8 +179,8 @@ export function RevisedCSATCharts({ data, dateRange }: CSATChartsProps) {
         <div 
           id="helpTopics" 
           className="bg-white p-4 rounded-lg shadow-md relative"
-          onMouseEnter={() => setHoveredChart('helpTopics')}
-          onMouseLeave={() => setHoveredChart(null)}
+          onMouseEnter={() => !isEditingLayout && setHoveredChart('helpTopics')}
+          onMouseLeave={() => !isEditingLayout && setHoveredChart(null)}
         >
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-md">Tickets by Help Topic</h3>
@@ -207,8 +207,8 @@ export function RevisedCSATCharts({ data, dateRange }: CSATChartsProps) {
         <div 
           id="impactLevel" 
           className="bg-white p-4 rounded-lg shadow-md relative"
-          onMouseEnter={() => setHoveredChart('impactLevel')}
-          onMouseLeave={() => setHoveredChart(null)}
+          onMouseEnter={() => !isEditingLayout && setHoveredChart('impactLevel')}
+          onMouseLeave={() => !isEditingLayout && setHoveredChart(null)}
         >
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-md">Tickets by Impact Level</h3>
@@ -235,8 +235,8 @@ export function RevisedCSATCharts({ data, dateRange }: CSATChartsProps) {
         <div 
           id="ticketTypes" 
           className="bg-white p-4 rounded-lg shadow-md relative"
-          onMouseEnter={() => setHoveredChart('ticketTypes')}
-          onMouseLeave={() => setHoveredChart(null)}
+          onMouseEnter={() => !isEditingLayout && setHoveredChart('ticketTypes')}
+          onMouseLeave={() => !isEditingLayout && setHoveredChart(null)}
         >
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-md">Tickets by Type</h3>

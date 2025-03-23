@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { uiColors } from '../utils/theme';
 
 interface EditLayoutButtonProps {
   isEditing: boolean;
@@ -14,8 +15,8 @@ export function EditLayoutButton({ isEditing, onClick }: EditLayoutButtonProps) 
       className={`
         flex items-center px-3 py-1.5 rounded font-medium transition-colors shadow-sm text-sm
         ${isEditing 
-          ? 'bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-300 border' 
-          : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border-gray-200 border'}
+          ? `${uiColors.primary.bgLight} ${uiColors.primary.text} ${uiColors.primary.hover} ${uiColors.primary.border} border` 
+          : `${uiColors.default.bg} ${uiColors.default.text} ${uiColors.default.hover} border-grey-70 border`}
       `}
     >
       <svg 

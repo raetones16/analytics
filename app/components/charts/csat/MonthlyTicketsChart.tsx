@@ -4,6 +4,7 @@ import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { ChartProps } from './types';
 import { formatDateForDisplay } from '../../../utils/date-utils';
+import { chartColors } from '../../../utils/theme';
 
 export function MonthlyTicketsChart({ data }: ChartProps) {
   // Format data for the chart
@@ -26,7 +27,7 @@ export function MonthlyTicketsChart({ data }: ChartProps) {
           <XAxis dataKey="name" />
           <YAxis />
           <Tooltip formatter={(value) => [`${value} tickets`, 'Total']} />
-          <Bar dataKey="value" fill="#8884d8" name="Tickets" />
+          <Bar dataKey="value" fill={chartColors.primary} name="Tickets" />
         </BarChart>
       </ResponsiveContainer>
     </div>

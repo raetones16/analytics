@@ -1,4 +1,5 @@
 import React from 'react';
+import { uiColors } from '../utils/theme';
 
 interface SyntheticDataIndicatorProps {
   isVisible: boolean;
@@ -18,27 +19,27 @@ export const SyntheticDataIndicator: React.FC<SyntheticDataIndicatorProps> = ({
   // Don't render anything if there's no synthetic data
   if (!isVisible) return null;
 
-  let bgColor = 'bg-blue-50';
-  let borderColor = 'border-blue-400';
-  let textColor = 'text-blue-700';
+  let bgColor = uiColors.info.bg;
+  let borderColor = uiColors.info.border;
+  let textColor = uiColors.info.text;
   let message = '';
   
   // Determine style and message based on type
   if (type === 'full') {
-    bgColor = 'bg-yellow-50';
-    borderColor = 'border-yellow-400';
-    textColor = 'text-yellow-700';
+    bgColor = uiColors.warning.bg;
+    borderColor = uiColors.warning.border;
+    textColor = uiColors.warning.text;
     message = `Using fully synthetic ${dataName}`;
   } else if (type === 'distribution') {
-    bgColor = 'bg-blue-50';
-    borderColor = 'border-blue-400';
-    textColor = 'text-blue-700';
+    bgColor = uiColors.info.bg;
+    borderColor = uiColors.info.border;
+    textColor = uiColors.info.text;
     message = `Using real totals with synthetic time distribution`;
   } else {
     // Partial type
-    bgColor = 'bg-blue-50';
-    borderColor = 'border-blue-400';
-    textColor = 'text-blue-700';
+    bgColor = uiColors.info.bg;
+    borderColor = uiColors.info.border;
+    textColor = uiColors.info.text;
     message = `Using partially synthetic ${dataName}`;
   }
   

@@ -7,6 +7,7 @@ import { SalesCharts } from "./components/SalesCharts";
 import { CSATCharts } from "./components/CSATCharts";
 import { RevisedCSATCharts } from "./components/RevisedCSATCharts";
 import { processChartData } from "./utils/date-utils";
+import { uiColors } from "./utils/theme";
 
 // Define types for our data
 interface ProductUsageData {
@@ -442,20 +443,20 @@ export default function Dashboard() {
       </header>
 
       {error && (
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+        <div className={`${uiColors.warning.bg} border-l-4 ${uiColors.warning.border} p-4 mb-6`}>
           <div className="flex">
             <div className="ml-3">
-              <p className="text-yellow-700">{error}</p>
+              <p className={uiColors.warning.text}>{error}</p>
             </div>
           </div>
         </div>
       )}
 
       {dataSource === "mock" && !error && (
-        <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+        <div className={`${uiColors.info.bg} border-l-4 ${uiColors.info.border} p-4 mb-6`}>
           <div className="flex">
             <div className="ml-3">
-              <p className="text-blue-700">
+              <p className={uiColors.info.text}>
                 Using mock data. No real data available from API.
               </p>
             </div>

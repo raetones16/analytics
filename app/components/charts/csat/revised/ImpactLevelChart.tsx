@@ -16,6 +16,7 @@ import {
 } from 'recharts';
 import { ChartProps } from '../types';
 import { StandardTooltip, numberFormatter } from '../../tooltips';
+import { severityColorsMapped, chartPalette } from '../../../../utils/theme';
 
 interface ImpactLevelChartProps extends ChartProps {
   visualizationType?: 'bar' | 'pie' | 'donut';
@@ -37,10 +38,10 @@ export function ImpactLevelChart({ data, visualizationType = 'pie' }: ImpactLeve
   
   // Prepare data for the chart with consistent order (from low to urgent)
   const chartData = [
-    { name: 'Low', value: latestData.supportTicketsBySeverity.low, color: '#82ca9d' },
-    { name: 'Medium', value: latestData.supportTicketsBySeverity.medium, color: '#8884d8' },
-    { name: 'High', value: latestData.supportTicketsBySeverity.high, color: '#ffc658' },
-    { name: 'Urgent', value: latestData.supportTicketsBySeverity.urgent, color: '#ff8042' }
+    { name: 'Low', value: latestData.supportTicketsBySeverity.low, color: severityColorsMapped.low },
+    { name: 'Medium', value: latestData.supportTicketsBySeverity.medium, color: severityColorsMapped.medium },
+    { name: 'High', value: latestData.supportTicketsBySeverity.high, color: severityColorsMapped.high },
+    { name: 'Urgent', value: latestData.supportTicketsBySeverity.urgent, color: severityColorsMapped.urgent }
   ];
   
   // Render bar chart

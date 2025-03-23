@@ -48,14 +48,10 @@ export interface ChartProps {
   data: SalesData[];
 }
 
+import { categoryColorsMapped } from '../../../utils/theme';
+
 // Common category colors to ensure consistency across charts
-export const categoryColors = {
-  newDirect: "#8884d8",      // Purple
-  newPartner: "#82ca9d",     // Green
-  existingClient: "#ffc658", // Yellow
-  existingPartner: "#8B008B", // Dark Purple
-  selfService: "#ff8042"     // Orange
-};
+export const categoryColors = categoryColorsMapped;
 
 // Category display names
 export const categoryDisplayNames: Record<CategoryKey, string> = {

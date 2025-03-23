@@ -1,4 +1,5 @@
 import React from 'react';
+import { chartColors } from '../../../utils/theme';
 import { 
   AreaChart, 
   Area, 
@@ -49,16 +50,16 @@ const ARRGrowthChart: React.FC<ARRGrowthChartProps> = ({ data, visualizationType
             type="monotone" 
             dataKey="arrGrowth" 
             name="ARR Growth" 
-            fill="#8884d8" 
-            stroke="#8884d8"
+            fill={chartColors.primary} 
+            stroke={chartColors.primary}
             fillOpacity={0.3}
           />
           <Area 
             type="monotone" 
             dataKey="arrGrowthSmoothed" 
             name="ARR Growth (3-month avg)" 
-            fill="#82ca9d" 
-            stroke="#82ca9d"
+            fill={chartColors.accent} 
+            stroke={chartColors.accent}
             fillOpacity={0.3}
           />
         </AreaChart>
@@ -76,14 +77,14 @@ const ARRGrowthChart: React.FC<ARRGrowthChartProps> = ({ data, visualizationType
             type="monotone" 
             dataKey="arrGrowth" 
             name="ARR Growth" 
-            stroke="#8884d8"
+            stroke={chartColors.primary}
             activeDot={{ r: 8 }}
           />
           <Line 
             type="monotone" 
             dataKey="arrGrowthSmoothed" 
             name="ARR Growth (3-month avg)" 
-            stroke="#82ca9d"
+            stroke={chartColors.accent}
             activeDot={{ r: 8 }}
           />
         </LineChart>
@@ -100,12 +101,12 @@ const ARRGrowthChart: React.FC<ARRGrowthChartProps> = ({ data, visualizationType
           <Bar 
             dataKey="arrGrowth" 
             name="ARR Growth" 
-            fill="#8884d8"
+            fill={chartColors.primary}
           />
           <Bar 
             dataKey="arrGrowthSmoothed" 
             name="ARR Growth (3-month avg)" 
-            fill="#82ca9d"
+            fill={chartColors.accent}
           />
         </BarChart>
       </ResponsiveContainer>

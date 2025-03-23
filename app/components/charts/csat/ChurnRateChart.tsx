@@ -3,6 +3,7 @@
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ChartProps } from './types';
+import { chartPalette, getTailwindColor } from '../../../utils/theme';
 
 const ChurnRateChart: React.FC<ChartProps> = ({ data }) => {
   if (data.length === 0) return null;
@@ -21,7 +22,7 @@ const ChurnRateChart: React.FC<ChartProps> = ({ data }) => {
             type="monotone" 
             dataKey="churnPercentage" 
             name="Churn Rate" 
-            stroke="#FF8042" 
+            stroke={getTailwindColor('rose-50')} 
             activeDot={{ r: 8 }} 
           />
         </LineChart>

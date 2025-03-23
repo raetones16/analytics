@@ -3,6 +3,7 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { ChartProps, prepareTopicsData } from './types';
+import { chartColors } from '../../../utils/theme';
 
 const TopSupportTopicsChart: React.FC<ChartProps> = ({ data }) => {
   if (data.length === 0) return null;
@@ -20,7 +21,7 @@ const TopSupportTopicsChart: React.FC<ChartProps> = ({ data }) => {
           <XAxis dataKey="topic" />
           <YAxis />
           <Tooltip />
-          <Bar dataKey="count" name="Tickets" fill="#8884d8" />
+          <Bar dataKey="count" name="Tickets" fill={chartColors.primary} />
         </BarChart>
       </ResponsiveContainer>
     </div>
