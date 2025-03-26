@@ -38,5 +38,7 @@ export function processChartData<T extends { date: string }>(data: T[]): (T & { 
     return new Date(a.date).getTime() - new Date(b.date).getTime();
   });
   
+  console.log(`processChartData: Processed ${sortedData.length} data points, sorted from ${sortedData.length > 0 ? sortedData[0].date : 'none'} to ${sortedData.length > 0 ? sortedData[sortedData.length - 1].date : 'none'}`);
+  
   return sortedData;
 }

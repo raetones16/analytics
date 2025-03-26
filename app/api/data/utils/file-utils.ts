@@ -121,30 +121,77 @@ export function formatDateForDisplay(date: Date | null): string {
   return `${months[date.getMonth()]} ${date.getFullYear()}`;
 }
 
-// Read file based on extension
-export async function readFile(filePath: string): Promise<{ data: any[] }> {
+// Interface for CSV options
+export interface CSVReadOptions {
+  header?: boolean;
+  dynamicTyping?: boolean;
+  skipEmptyLines?: boolean;
+  delimiter?: string;
+  comments?: string | boolean;
+  encoding?: string;
+  // Add other Papa Parse options as needed
+}
+
+// Interface for Excel reading options
+export interface ExcelReadOptions {
+  sheetName?: string | number;
+  cellDates?: boolean;
+  cellFormula?: boolean; // Correct property name for SheetJS
+  cellStyles?: boolean;
+  dateNF?: string;
+  raw?: boolean;
+  headerRows?: number;
+  range?: string;
+  defval?: any;
+  blankrows?: boolean;
+  sheetStubs?: boolean;
+}
+
+// Interface for file reading options
+export interface FileReadOptions {
+  excel?: ExcelReadOptions;  // Excel-specific options
+  csv?: CSVReadOptions;  // CSV-specific options
+}
+
+// Read file based on extension with enhanced options
+export async function readFile(
+  filePath: string, 
+  options: FileReadOptions = {}
+): Promise<{ data: any[] }> {
   const ext = path.extname(filePath).toLowerCase();
   
   if (ext === '.csv') {
-    return readCSVFile(filePath);
+    return readCSVFile(filePath, options.csv);
   } else if (ext === '.xlsx' || ext === '.xls') {
-    return { data: await readExcelFile(filePath) };
+    return { data: await readExcelFile(filePath, options.excel || {}) };
   } else {
     log(LOG_LEVEL.WARN, `Unknown file extension: ${ext} for file ${filePath}`);
     return { data: [] };
   }
 }
 
-// Read CSV file with minimal logging
-export async function readCSVFile(filePath: string): Promise<{ data: any[], meta?: any }> {
+// Read CSV file with configurable options
+export async function readCSVFile(
+  filePath: string, 
+  options?: CSVReadOptions
+): Promise<{ data: any[], meta?: Papa.ParseMeta }> {
   try {
     log(LOG_LEVEL.INFO, `Reading CSV file: ${path.basename(filePath)}`);
     const content = await fs.readFile(filePath, 'utf8');
-    const result = Papa.parse(content, { 
-      header: true, 
+    
+    // Default options with overrides from passed options
+    const parseOptions: Papa.ParseConfig = {
+      header: true,
       dynamicTyping: true,
-      skipEmptyLines: true
-    });
+      skipEmptyLines: true,
+      ...(options ? {
+        ...options,
+        // Ensure comments is properly typed
+        comments: typeof options.comments === 'string' ? options.comments : options.comments === true ? false : options.comments
+      } : {})
+    };
+    
+    const result = Papa.parse<any>(content, parseOptions);
     
     if (result.data.length > 0) {
       log(LOG_LEVEL.INFO, `CSV columns: ${result.meta?.fields?.join(', ') || 'No columns found'}`);
@@ -166,15 +213,29 @@ export async function readCSVFile(filePath: string): Promise<{ data: any[], meta
   }
 }
 
-// Read Excel file with minimal logging
-export async function readExcelFile(filePath: string, sheetName: string | number = 0): Promise<any[]> {
+// Read Excel file with enhanced options and error handling
+export async function readExcelFile(
+  filePath: string, 
+  options: ExcelReadOptions = {}
+): Promise<any[]> {
   try {
     log(LOG_LEVEL.INFO, `Reading Excel file: ${path.basename(filePath)}`);
     const buffer = await fs.readFile(filePath);
     
     let workbook;
     try {
-      workbook = xlsx.read(buffer, { type: 'buffer' });
+      // Apply default options for XLSX parsing and merge with user options
+      const xlsxOptions: xlsx.ParsingOptions = {
+        type: 'buffer' as const,
+        cellDates: options.cellDates ?? true,    // Convert dates by default
+        cellFormula: options.cellFormula ?? false, // Don't evaluate formulas by default
+        cellStyles: options.cellStyles ?? false,    // Don't include styles by default
+        dateNF: options.dateNF,        // Optional date format string
+        sheetStubs: options.sheetStubs ?? true,  // Include empty cells
+        raw: options.raw ?? false      // Convert raw values by default
+      };
+      
+      workbook = xlsx.read(buffer, xlsxOptions);
     } catch (xlsxError: unknown) {
       let errorMessage = 'Unknown Excel parsing error';
       if (xlsxError instanceof Error) {
@@ -186,11 +247,30 @@ export async function readExcelFile(filePath: string, sheetName: string | number
       return [];
     }
     
+    // Determine which sheet to use
+    const sheetName = options.sheetName ?? 0; // Default to first sheet
     const sheetNameToUse = typeof sheetName === 'string' && workbook.SheetNames.includes(sheetName)
-      ? sheetName : workbook.SheetNames[Number(sheetName) || 0];
+      ? sheetName 
+      : workbook.SheetNames[Number(sheetName) || 0];
     
+    if (!sheetNameToUse) {
+      log(LOG_LEVEL.ERROR, `No valid sheet found in Excel file: ${path.basename(filePath)}`);
+      return [];
+    }
+    
+    log(LOG_LEVEL.INFO, `Using sheet '${sheetNameToUse}' from file ${path.basename(filePath)}`);
     const sheet = workbook.Sheets[sheetNameToUse];
-    const data = xlsx.utils.sheet_to_json(sheet);
+    
+    // Configure sheet_to_json options
+    const sheetToJsonOptions: xlsx.Sheet2JSONOpts = {
+      header: options.headerRows, // Can be a row number or undefined for first row
+      range: options.range,       // Optional range to read
+      defval: options.defval,     // Default value for empty cells
+      blankrows: options.blankrows ?? false  // Don't include blank rows by default
+    };
+    
+    // Convert sheet to JSON
+    const data = xlsx.utils.sheet_to_json(sheet, sheetToJsonOptions);
     
     if (data.length > 0 && typeof data[0] === 'object' && data[0] !== null) {
       log(LOG_LEVEL.INFO, `Excel sheet: ${sheetNameToUse}, columns: ${Object.keys(data[0]).join(', ')}`);

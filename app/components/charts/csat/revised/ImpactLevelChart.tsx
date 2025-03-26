@@ -12,36 +12,74 @@ import {
   Legend,
   PieChart,
   Pie,
-  Cell
+  Cell,
+  LineChart,
+  Line
 } from 'recharts';
 import { ChartProps } from '../types';
 import { StandardTooltip, numberFormatter } from '../../tooltips';
 import { severityColorsMapped, chartPalette } from '../../../../utils/theme';
+import { formatDateForDisplay } from '../../../../utils/date-utils';
 
 interface ImpactLevelChartProps extends ChartProps {
-  visualizationType?: 'bar' | 'pie' | 'donut';
+  visualizationType?: 'bar' | 'pie' | 'donut' | 'timeline';
 }
 
-export function ImpactLevelChart({ data, visualizationType = 'pie' }: ImpactLevelChartProps) {
-  // Get the latest data point
-  const latestData = data.length > 0 
-    ? data.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] 
-    : null;
-  
-  if (!latestData) {
-    return (
-      <div>
-        <p>No data available</p>
-      </div>
-    );
+export function ImpactLevelChart({ data, visualizationType = 'timeline' }: ImpactLevelChartProps) {
+  if (!data || data.length === 0) {
+    return <div>No data available</div>;
   }
   
-  // Prepare data for the chart with consistent order (from low to urgent)
+  // If visualization is timeline, we need a different approach
+  if (visualizationType === 'timeline') {
+    // Sort data chronologically
+    const sortedData = [...data].sort((a, b) => 
+      new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+    
+    // Format data for timeline visualization
+    const timelineData = sortedData.map(item => ({
+      date: formatDateForDisplay(new Date(item.date)),
+      low: item.supportTicketsBySeverity.low,
+      medium: item.supportTicketsBySeverity.medium,
+      high: item.supportTicketsBySeverity.high,
+      urgent: item.supportTicketsBySeverity.urgent,
+      // Add total as well
+      total: item.totalTickets
+    }));
+    
+    return (
+      <ResponsiveContainer width="100%" height={400}>
+        <BarChart
+          data={timelineData}
+          margin={{ top: 10, right: 30, left: 20, bottom: 30 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="date" angle={-45} textAnchor="end" height={60} />
+          <YAxis />
+          <Tooltip content={<StandardTooltip formatter={numberFormatter} />} />
+          <Legend />
+          <Bar dataKey="low" name="Low" stackId="severity" fill={severityColorsMapped.low} />
+          <Bar dataKey="medium" name="Medium" stackId="severity" fill={severityColorsMapped.medium} />
+          <Bar dataKey="high" name="High" stackId="severity" fill={severityColorsMapped.high} />
+          <Bar dataKey="urgent" name="Urgent" stackId="severity" fill={severityColorsMapped.urgent} />
+        </BarChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  // Aggregate severity levels across all time periods
+  const totalLow = data.reduce((sum, item) => sum + item.supportTicketsBySeverity.low, 0);
+  const totalMedium = data.reduce((sum, item) => sum + item.supportTicketsBySeverity.medium, 0);
+  const totalHigh = data.reduce((sum, item) => sum + item.supportTicketsBySeverity.high, 0);
+  const totalUrgent = data.reduce((sum, item) => sum + item.supportTicketsBySeverity.urgent, 0);
+  
+  // Prepare aggregated data for charts
   const chartData = [
-    { name: 'Low', value: latestData.supportTicketsBySeverity.low, color: severityColorsMapped.low },
-    { name: 'Medium', value: latestData.supportTicketsBySeverity.medium, color: severityColorsMapped.medium },
-    { name: 'High', value: latestData.supportTicketsBySeverity.high, color: severityColorsMapped.high },
-    { name: 'Urgent', value: latestData.supportTicketsBySeverity.urgent, color: severityColorsMapped.urgent }
+    { name: 'Low', value: totalLow, color: severityColorsMapped.low },
+    { name: 'Medium', value: totalMedium, color: severityColorsMapped.medium },
+    { name: 'High', value: totalHigh, color: severityColorsMapped.high },
+    { name: 'Urgent', value: totalUrgent, color: severityColorsMapped.urgent }
   ];
   
   // Render bar chart

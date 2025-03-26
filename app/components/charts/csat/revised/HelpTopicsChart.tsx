@@ -24,24 +24,30 @@ interface HelpTopicsChartProps extends ChartProps {
 }
 
 export function HelpTopicsChart({ data, visualizationType = 'horizontalBar' }: HelpTopicsChartProps) {
-  // Get the latest data point for the chart
-  const latestData = data.length > 0 
-    ? data.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] 
-    : null;
-  
-  if (!latestData) {
-    return (
-      <div>
-        <p>No data available</p>
-      </div>
-    );
+  if (!data || data.length === 0) {
+    return <div>No data available</div>;
   }
   
-  // Prepare data for the chart - sort by count descending and limit to top 10
-  const chartData = Object.entries(latestData.supportTopics)
-    .map(([topic, count]) => ({ topic, count, value: count })) // Adding 'value' for Treemap
+  // Aggregate topics across all time periods
+  const aggregatedTopics: Record<string, number> = {};
+  
+  // Process each data point
+  data.forEach(dataPoint => {
+    const topics = dataPoint.supportTopics || {};
+    
+    // Add each topic count to the aggregated totals
+    Object.entries(topics).forEach(([topic, count]) => {
+      if (typeof count === 'number') {
+        aggregatedTopics[topic] = (aggregatedTopics[topic] || 0) + count;
+      }
+    });
+  });
+  
+  // Convert to array format for charts
+  const chartData = Object.entries(aggregatedTopics)
+    .map(([topic, count]) => ({ topic, count, value: count }))
     .sort((a, b) => b.count - a.count)
-    .slice(0, 10); // Limit to top 10 for better readability
+    .slice(0, 10); // Limit to top 10 for readability
   
   // Colors for pie chart and treemap
   const COLORS = chartColorSchemes.categorical;

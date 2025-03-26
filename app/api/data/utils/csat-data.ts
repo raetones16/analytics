@@ -29,23 +29,77 @@ export async function processCSATData(): Promise<CSATDataPoint[]> {
     log(LOG_LEVEL.INFO, "Processing CSAT data...");
     const files = await fs.readdir(DATA_DIRS.support);
     
-    // Find the support file
-    const supportFile = files.find(f => f.includes('Freshdesk'));
-    log(LOG_LEVEL.INFO, `Found support file: ${supportFile}`);
+    // Filter for Freshdesk XLSX files with our expected format pattern
+    const xlsxSupportFiles = files.filter(f => 
+      f.toLowerCase().includes('freshdesk') && 
+      path.extname(f).toLowerCase() === '.xlsx'
+    );
     
-    if (!supportFile) {
-      log(LOG_LEVEL.ERROR, "No support file found");
+    log(LOG_LEVEL.INFO, `Found ${xlsxSupportFiles.length} support XLSX files`);
+    
+    if (xlsxSupportFiles.length === 0) {
+      log(LOG_LEVEL.ERROR, "No support XLSX files found");
       return [];
     }
 
-    // Read the data
-    const supportResult = await readFile(path.join(DATA_DIRS.support, supportFile));
-    const supportData = supportResult.data;
+    // Read data from all XLSX files and combine
+    let allSupportData: any[] = [];
     
-    if (!supportData || supportData.length === 0) {
-      log(LOG_LEVEL.ERROR, "No data found in support file");
+    // Process each XLSX file
+    for (const file of xlsxSupportFiles) {
+      try {
+        log(LOG_LEVEL.INFO, `Processing support file: ${file}`);
+        const filePath = path.join(DATA_DIRS.support, file);
+        
+        // Use enhanced Excel reading options for better parsing
+        const fileResult = await readFile(filePath, {
+          excel: {
+            cellDates: true,        // Parse dates properly
+            sheetStubs: true,       // Include empty cells
+            blankrows: false        // Skip blank rows
+          }
+        });
+        
+        if (fileResult.data && fileResult.data.length > 0) {
+          log(LOG_LEVEL.INFO, `Read ${fileResult.data.length} records from ${file}`);
+          
+          // Extract month/year from filename for better organization
+          // Pattern: "Freshdesk Tickets - YY-MM.xlsx"
+          const filePattern = /Freshdesk Tickets - (\d{2})-(\d{2})\.xlsx$/i;
+          const match = file.match(filePattern);
+          
+          // Add file source to each record for debugging and analysis
+          const dataWithSource = fileResult.data.map(record => ({
+            ...record,
+            _fileSource: file,
+            // Add year/month info if it can be extracted from filename
+            ...(match ? {
+              _fileYear: `20${match[1]}`, // Convert 'YY' to '20YY'
+              _fileMonth: match[2]
+            } : {})
+          }));
+          
+          allSupportData = [...allSupportData, ...dataWithSource];
+        } else {
+          log(LOG_LEVEL.WARN, `No data found in file: ${file}`);
+        }
+      } catch (fileError: unknown) {
+        let errorMessage = 'Unknown error';
+        if (fileError instanceof Error) {
+          errorMessage = fileError.message;
+        }
+        log(LOG_LEVEL.ERROR, `Error processing file ${file}: ${errorMessage}`);
+        // Continue with other files even if one fails
+      }
+    }
+    
+    if (allSupportData.length === 0) {
+      log(LOG_LEVEL.ERROR, "No data found in any support files");
       return [];
     }
+    
+    // Use the combined data from all files
+    const supportData = allSupportData;
 
     // Find relevant columns
     if (supportData?.length > 0) {
@@ -65,9 +119,10 @@ export async function processCSATData(): Promise<CSATDataPoint[]> {
       }
 
       // Group by month
-      const dataByMonth = new Map();
+      const dataByMonth = new Map<string, any[]>();
       
-      supportData.forEach((ticket, index) => {
+      // Process all support data from all files
+      allSupportData.forEach((ticket, index) => {
         try {
           if (!ticket[dateColumn]) {
             log(LOG_LEVEL.WARN, `Missing date in support ticket row ${index}`);
@@ -93,7 +148,7 @@ export async function processCSATData(): Promise<CSATDataPoint[]> {
           const type = typeColumn ? (ticket[typeColumn] || 'Other') : 'Other';
           const group = groupColumn ? (ticket[groupColumn] || 'No Group') : 'No Group';
           
-          dataByMonth.get(monthKey).push({ priority, topic, type, group });
+          dataByMonth.get(monthKey)!.push({ priority, topic, type, group });
         } catch (error: unknown) {
           let errorMessage = 'Unknown error';
           if (error instanceof Error) {
@@ -104,6 +159,16 @@ export async function processCSATData(): Promise<CSATDataPoint[]> {
           log(LOG_LEVEL.ERROR, `Error processing support ticket row ${index}: ${errorMessage}`);
         }
       });
+      
+      log(LOG_LEVEL.INFO, `Processing ${Array.from(dataByMonth.keys()).length} months of support data`);
+      
+      // Calculate data points and ticket counts for logging
+      let totalTicketCount = 0;
+      Array.from(dataByMonth.values()).forEach(tickets => {
+        totalTicketCount += tickets.length;
+      });
+      
+      log(LOG_LEVEL.INFO, `Total tickets across all months: ${totalTicketCount}`);
 
       // Calculate metrics for each month
       const processedData: CSATDataPoint[] = [];
@@ -199,7 +264,7 @@ export async function processCSATData(): Promise<CSATDataPoint[]> {
           });
         });
 
-      log(LOG_LEVEL.INFO, `Processed ${processedData.length} CSAT data points`);
+      log(LOG_LEVEL.INFO, `Processed ${processedData.length} CSAT data points with a total of ${processedData.reduce((sum, item) => sum + item.totalTickets, 0)} tickets`);
       return processedData.length > 0 ? processedData : createSyntheticCSATData();
     }
     

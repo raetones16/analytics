@@ -32,7 +32,7 @@ export function RevisedCSATCharts({ data, dateRange }: CSATChartsProps) {
   // State for visualization preferences
   const [visualPreferences, setVisualPreferences] = useState({
     helpTopics: 'horizontalBar', // default
-    impactLevel: 'pie',
+    impactLevel: 'timeline', // Changed default to timeline for monthly breakdown
     ticketTypes: 'horizontalBar',
     monthlyTickets: 'line'
   });
@@ -79,9 +79,6 @@ export function RevisedCSATCharts({ data, dateRange }: CSATChartsProps) {
   const syntheticDetails = hasSyntheticTickets 
     ? 'Using synthetic support ticket data for demonstration' 
     : '';
-  
-  // Get the latest data point for the summary stats
-  const latestData = data.length > 0 ? data[data.length - 1] : null;
   
   // If we have no data, show a message
   if (!data || data.length === 0) {
@@ -134,8 +131,8 @@ export function RevisedCSATCharts({ data, dateRange }: CSATChartsProps) {
         type={'partial'}
       />
       
-      {/* Summary Stats */}
-      {latestData && <SummaryStats data={latestData} />}
+      {/* Summary Stats - Pass the full data array */}
+      <SummaryStats data={data} />
       
       
       <LayoutManagerWithGrid
@@ -145,35 +142,33 @@ export function RevisedCSATCharts({ data, dateRange }: CSATChartsProps) {
         onSave={handleSaveLayout}
         onCancel={handleCancelLayout}
       >
-        {/* Monthly Tickets Chart - Only show for date ranges longer than a month */}
-        {dateRange !== 'month' && (
-          <div 
-            id="monthlyTickets" 
-            className="bg-white p-4 rounded-lg shadow-md relative"
-            onMouseEnter={() => !isEditingLayout && setHoveredChart('monthlyTickets')}
-            onMouseLeave={() => !isEditingLayout && setHoveredChart(null)}
-          >
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="text-md">Monthly Ticket Volume</h3>
-              <div className={`transition-opacity duration-200 ${hoveredChart === 'monthlyTickets' ? 'opacity-100' : 'opacity-0'}`}>
-                <VisualizationToggle
-                  current={visualPreferences.monthlyTickets}
-                  options={[
-                    { value: 'line', label: 'Line' },
-                    { value: 'bar', label: 'Bar' },
-                    { value: 'area', label: 'Area' }
-                  ]}
-                  onChange={handleVisualizationChange}
-                  chartName="monthlyTickets"
-                />
-              </div>
+        {/* Monthly Tickets Chart */}
+        <div 
+          id="monthlyTickets" 
+          className="bg-white p-4 rounded-lg shadow-md relative"
+          onMouseEnter={() => !isEditingLayout && setHoveredChart('monthlyTickets')}
+          onMouseLeave={() => !isEditingLayout && setHoveredChart(null)}
+        >
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-md">Monthly Ticket Volume</h3>
+            <div className={`transition-opacity duration-200 ${hoveredChart === 'monthlyTickets' ? 'opacity-100' : 'opacity-0'}`}>
+              <VisualizationToggle
+                current={visualPreferences.monthlyTickets}
+                options={[
+                  { value: 'line', label: 'Line' },
+                  { value: 'bar', label: 'Bar' },
+                  { value: 'area', label: 'Area' }
+                ]}
+                onChange={handleVisualizationChange}
+                chartName="monthlyTickets"
+              />
             </div>
-            <MonthlyTicketsChart 
-              data={data} 
-              visualizationType={visualPreferences.monthlyTickets as 'line' | 'bar' | 'area'}
-            />
           </div>
-        )}
+          <MonthlyTicketsChart 
+            data={data} 
+            visualizationType={visualPreferences.monthlyTickets as 'line' | 'bar' | 'area'}
+          />
+        </div>
         
         {/* Help Topics Chart */}
         <div 
@@ -216,6 +211,7 @@ export function RevisedCSATCharts({ data, dateRange }: CSATChartsProps) {
               <VisualizationToggle
                 current={visualPreferences.impactLevel}
                 options={[
+                  { value: 'timeline', label: 'Monthly' },
                   { value: 'pie', label: 'Pie' },
                   { value: 'bar', label: 'Bar' },
                   { value: 'donut', label: 'Donut' }
@@ -227,7 +223,7 @@ export function RevisedCSATCharts({ data, dateRange }: CSATChartsProps) {
           </div>
           <ImpactLevelChart 
             data={data} 
-            visualizationType={visualPreferences.impactLevel as 'pie' | 'bar' | 'donut'}
+            visualizationType={visualPreferences.impactLevel as 'pie' | 'bar' | 'donut' | 'timeline'}
           />
         </div>
         
@@ -246,7 +242,8 @@ export function RevisedCSATCharts({ data, dateRange }: CSATChartsProps) {
                 options={[
                   { value: 'horizontalBar', label: 'Bar' },
                   { value: 'pie', label: 'Pie' },
-                  { value: 'donut', label: 'Donut' }
+                  { value: 'donut', label: 'Donut' },
+                  { value: 'timeline', label: 'Timeline' }
                 ]}
                 onChange={handleVisualizationChange}
                 chartName="ticketTypes"
@@ -255,7 +252,7 @@ export function RevisedCSATCharts({ data, dateRange }: CSATChartsProps) {
           </div>
           <TicketTypesChart 
             data={data} 
-            visualizationType={visualPreferences.ticketTypes as 'horizontalBar' | 'pie' | 'donut'}
+            visualizationType={visualPreferences.ticketTypes as 'horizontalBar' | 'pie' | 'donut' | 'timeline'}
           />
         </div>
       </LayoutManagerWithGrid>

@@ -279,7 +279,20 @@ export default function Dashboard() {
 
         if (response.ok) {
           const data = await response.json();
-          console.log("API response:", data);
+          // Add detailed console logging for data
+          console.log(`Data from API - Product: ${data.productData?.length || 0}, Sales: ${data.salesData?.length || 0}, CSAT: ${data.csatData?.length || 0}`);
+          
+          if (data.csatData && data.csatData.length > 0) {
+            // Log CSAT ticket totals to verify data
+            const totalCsatTickets = data.csatData.reduce((sum: number, item: CSATData) => sum + item.totalTickets, 0);
+            console.log(`Total CSAT tickets in API data: ${totalCsatTickets}`);
+            
+            // Log month range
+            const csatDates = data.csatData.map((item: CSATData) => new Date(item.date));
+            const oldestDate = new Date(Math.min(...csatDates.map((d: Date) => d.getTime())));
+            const newestDate = new Date(Math.max(...csatDates.map((d: Date) => d.getTime())));
+            console.log(`CSAT date range: ${oldestDate.toISOString().split('T')[0]} to ${newestDate.toISOString().split('T')[0]}`);
+          }
 
           // Check if we received data for each category
           const hasProductData =

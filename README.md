@@ -2,6 +2,20 @@
 
 A simple, functional analytics dashboard to visualize key business metrics from multiple data sources. The dashboard consolidates data from local files (Salesforce, ChurnZero, and Support Portal exports) into an easy-to-read interface that focuses on product usage, sales performance, and customer satisfaction.
 
+## Documentation
+
+For comprehensive documentation about this project, please refer to:
+
+**[Enhanced Analytics Dashboard Documentation](/Users/tim.prudames/analytics-docs/enhanced-dashboard/README.md)**
+
+This documentation includes details on:
+- Project overview and goals
+- Technical architecture
+- Implementation plans
+- User experience design
+- Data integration
+- And more
+
 ## Getting Started
 
 ### Prerequisites
@@ -148,3 +162,9 @@ If you encounter issues with data loading:
 3. Check that the file naming conventions match what the application expects
 4. Ensure your data files have the correct structure (columns, data types)
 5. Try regenerating the sample data with `npm run generate-data`
+
+## Future Development
+
+For details on the planned enhancements and the roadmap for this project, please refer to the documentation:
+- [Post-MVP Roadmap](/Users/tim.prudames/analytics-docs/enhanced-dashboard/02-post-mvp-roadmap.md)
+- [Implementation Plan](/Users/tim.prudames/analytics-docs/enhanced-dashboard/04-implementation-plan.md)

@@ -12,32 +12,98 @@ import {
   Legend,
   PieChart,
   Pie,
-  Cell
+  Cell,
+  LineChart,
+  Line
 } from 'recharts';
 import { ChartProps } from '../types';
 import { StandardTooltip, numberFormatter } from '../../tooltips';
 import { chartPalette, chartColorSchemes } from '../../../../utils/theme';
+import { formatDateForDisplay } from '../../../../utils/date-utils';
 
 interface TicketTypesChartProps extends ChartProps {
-  visualizationType?: 'horizontalBar' | 'pie' | 'donut';
+  visualizationType?: 'horizontalBar' | 'pie' | 'donut' | 'timeline';
 }
 
 export function TicketTypesChart({ data, visualizationType = 'horizontalBar' }: TicketTypesChartProps) {
-  // Get the latest data point
-  const latestData = data.length > 0 
-    ? data.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] 
-    : null;
+  if (!data || data.length === 0) {
+    return <div>No data available</div>;
+  }
   
-  if (!latestData) {
+  // If visualization is timeline, show the trend over time
+  if (visualizationType === 'timeline') {
+    // Sort data chronologically
+    const sortedData = [...data].sort((a, b) => 
+      new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+    
+    // Get unique ticket types across all data points
+    const allTicketTypes = new Set<string>();
+    sortedData.forEach(dataPoint => {
+      Object.keys(dataPoint.ticketTypes || {}).forEach(type => allTicketTypes.add(type));
+    });
+    
+    // Format data for timeline visualization
+    const timelineData = sortedData.map(item => {
+      const entry: any = {
+        date: formatDateForDisplay(new Date(item.date))
+      };
+      
+      // Add each ticket type as a property
+      allTicketTypes.forEach(type => {
+        entry[type] = item.ticketTypes[type] || 0;
+      });
+      
+      return entry;
+    });
+    
+    // Generate lines for each ticket type with consistent colors
+    const ticketTypeArray = Array.from(allTicketTypes);
+    const colors = chartColorSchemes.categorical;
+    
     return (
-      <div>
-        <p>No data available</p>
-      </div>
+      <ResponsiveContainer width="100%" height={400}>
+        <LineChart
+          data={timelineData}
+          margin={{ top: 10, right: 30, left: 20, bottom: 30 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="date" angle={-45} textAnchor="end" height={60} />
+          <YAxis />
+          <Tooltip content={<StandardTooltip formatter={numberFormatter} />} />
+          <Legend />
+          {ticketTypeArray.map((type, index) => (
+            <Line 
+              key={type}
+              type="monotone" 
+              dataKey={type} 
+              name={type} 
+              stroke={colors[index % colors.length]} 
+              strokeWidth={2}
+            />
+          ))}
+        </LineChart>
+      </ResponsiveContainer>
     );
   }
   
-  // Prepare data for the chart - sort by count descending
-  const chartData = Object.entries(latestData.ticketTypes)
+  // Aggregate ticket types across all time periods
+  const aggregatedTypes: Record<string, number> = {};
+  
+  // Process each data point
+  data.forEach(dataPoint => {
+    const types = dataPoint.ticketTypes || {};
+    
+    // Add each type count to the aggregated totals
+    Object.entries(types).forEach(([type, count]) => {
+      if (typeof count === 'number') {
+        aggregatedTypes[type] = (aggregatedTypes[type] || 0) + count;
+      }
+    });
+  });
+  
+  // Convert to array format for charts
+  const chartData = Object.entries(aggregatedTypes)
     .map(([type, count]) => ({ type, count, value: count, name: type }))
     .sort((a, b) => b.count - a.count);
   

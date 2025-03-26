@@ -12,7 +12,8 @@ import {
   LineChart,
   Line,
   AreaChart,
-  Area
+  Area,
+  Legend
 } from 'recharts';
 import { ChartProps } from '../types';
 import { formatDateForDisplay } from '../../../../utils/date-utils';
@@ -24,12 +25,17 @@ interface MonthlyTicketsChartProps extends ChartProps {
 }
 
 export function MonthlyTicketsChart({ data, visualizationType = 'line' }: MonthlyTicketsChartProps) {
-  // Format data for the chart
+  // Format data for the chart - sort by date, oldest to newest
   const chartData = data
     .map(item => ({
+      date: new Date(item.date),  // Convert string date to Date object
       month: formatDateForDisplay(new Date(item.date)),
       tickets: item.totalTickets
-    }));
+    }))
+    // Sort chronologically - oldest to newest
+    .sort((a, b) => a.date.getTime() - b.date.getTime())
+    // Remove the date property before rendering
+    .map(({ date, ...rest }) => rest);
 
   // Common chart properties
   const chartMargin = { top: 5, right: 30, left: 20, bottom: 25 };
@@ -52,12 +58,14 @@ export function MonthlyTicketsChart({ data, visualizationType = 'line' }: Monthl
           />
           <YAxis />
           <Tooltip content={<StandardTooltip formatter={numberFormatter} />} />
+          <Legend />
           <Line 
             type="monotone" 
             dataKey="tickets" 
             stroke={chartPalette.color1} 
             activeDot={{ r: 8 }}
             name="Total Tickets"
+            strokeWidth={2}
           />
         </LineChart>
       </ResponsiveContainer>
@@ -81,6 +89,7 @@ export function MonthlyTicketsChart({ data, visualizationType = 'line' }: Monthl
           />
           <YAxis />
           <Tooltip content={<StandardTooltip formatter={numberFormatter} />} />
+          <Legend />
           <Bar dataKey="tickets" fill={chartPalette.color1} name="Total Tickets" />
         </BarChart>
       </ResponsiveContainer>
@@ -104,6 +113,7 @@ export function MonthlyTicketsChart({ data, visualizationType = 'line' }: Monthl
           />
           <YAxis />
           <Tooltip content={<StandardTooltip formatter={numberFormatter} />} />
+          <Legend />
           <Area 
             type="monotone" 
             dataKey="tickets" 
