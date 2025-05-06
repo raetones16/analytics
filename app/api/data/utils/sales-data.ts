@@ -1,7 +1,7 @@
-import { promises as fs } from 'fs';
-import path from 'path';
-import { LOG_LEVEL, log } from './logging';
-import { DATA_DIRS, findColumn, parseDate, readCSVFile } from './file-utils';
+import { promises as fs } from "fs";
+import path from "path";
+import { LOG_LEVEL, log } from "./logging";
+import { DATA_DIRS, findColumn, parseDate, readCSVFile } from "./file-utils";
 
 // Define interfaces for the data
 interface SalesDataPoint {
@@ -41,20 +41,22 @@ export async function processSalesData(): Promise<SalesDataPoint[]> {
   try {
     log(LOG_LEVEL.INFO, "Processing sales data...");
     const files = await fs.readdir(DATA_DIRS.sales);
-    
+
     // Find the sales file
-    const salesforceFile = files.find(f => f.includes('salesforce'));
+    const salesforceFile = files.find((f) => f.includes("salesforce"));
     log(LOG_LEVEL.INFO, `Found sales file: ${salesforceFile}`);
-    
+
     if (!salesforceFile) {
       log(LOG_LEVEL.ERROR, "No salesforce file found");
       return [];
     }
 
     // Read the data
-    const result = await readCSVFile(path.join(DATA_DIRS.sales, salesforceFile));
+    const result = await readCSVFile(
+      path.join(DATA_DIRS.sales, salesforceFile)
+    );
     const salesforceData = result.data;
-    
+
     if (!salesforceData || salesforceData.length === 0) {
       log(LOG_LEVEL.ERROR, "No data found in salesforce file");
       return [];
@@ -63,14 +65,34 @@ export async function processSalesData(): Promise<SalesDataPoint[]> {
     // Find relevant columns
     if (salesforceData?.length > 0) {
       const firstRow = salesforceData[0];
-      const dateColumn = findColumn(firstRow, ['CloseDate', 'closeDate', 'Close_Date', 'Date']);
-      const amountColumn = findColumn(firstRow, ['Amount', 'amount', 'deal_amount', 'value', 'ARR__c']);
-      const modulesColumn = findColumn(firstRow, ['NumberOfModules', 'Modules', 'modules', 'User_Licenses1__c']);
-      const channelColumn = findColumn(firstRow, ['Channel__c', 'channel', 'Channel', 'sale_type']);
-      const typeColumn = findColumn(firstRow, ['Type', 'type', 'StageName']);
-      
-      log(LOG_LEVEL.INFO, `Sales columns - Date: ${dateColumn}, Amount: ${amountColumn}, Modules: ${modulesColumn}, Channel: ${channelColumn}, Type: ${typeColumn}`);
-      
+      const dateColumn = findColumn(firstRow, [
+        "CloseDate",
+        "closeDate",
+        "Close_Date",
+        "Date",
+      ]);
+      const amountColumn = findColumn(firstRow, [
+        "Amount",
+        "amount",
+        "deal_amount",
+        "value",
+        "ARR__c",
+      ]);
+      // Only explicit modules count column (avoid generic or license fields)
+      const modulesColumn = findColumn(firstRow, ["NumberOfModules"]);
+      const channelColumn = findColumn(firstRow, [
+        "Channel__c",
+        "channel",
+        "Channel",
+        "sale_type",
+      ]);
+      const typeColumn = findColumn(firstRow, ["Type", "type", "StageName"]);
+
+      log(
+        LOG_LEVEL.INFO,
+        `Sales columns - Date: ${dateColumn}, Amount: ${amountColumn}, Modules: ${modulesColumn}, Channel: ${channelColumn}, Type: ${typeColumn}`
+      );
+
       if (!dateColumn || !amountColumn) {
         log(LOG_LEVEL.ERROR, "Missing required columns in sales data");
         return [];
@@ -78,183 +100,195 @@ export async function processSalesData(): Promise<SalesDataPoint[]> {
 
       // Group by month, using the Channel__c field for categorization
       const dataByMonth = new Map();
-      
+
       // Function to categorize sales based on Channel__c field
       const getSalesCategory = (item: any) => {
         if (!channelColumn || !item[channelColumn]) {
-          return 'unknown';
+          return "unknown";
         }
-        
+
         const channelValue = String(item[channelColumn]).trim();
-        
+
         // Categories based on Channel__c value
-        if (channelValue === 'Direct Sale') {
-          return 'new-direct';
-        } else if (channelValue === 'Partner Sale (Partner)') {
-          return 'new-partner';
-        } else if (channelValue === 'Customer Sale') {
-          return 'existing-client';
-        } else if (channelValue === 'Customer Sale (Partner)') {
-          return 'existing-partner';
-        } else if (channelValue === 'Self-Service System Order') {
-          return 'self-service';
+        if (channelValue === "Direct Sale") {
+          return "new-direct";
+        } else if (channelValue === "Partner Sale (Partner)") {
+          return "new-partner";
+        } else if (channelValue === "Customer Sale") {
+          return "existing-client";
+        } else if (channelValue === "Customer Sale (Partner)") {
+          return "existing-partner";
+        } else if (channelValue === "Self-Service System Order") {
+          return "self-service";
         } else {
           log(LOG_LEVEL.WARN, `Unknown sales channel: ${channelValue}`);
-          return 'unknown';
+          return "unknown";
         }
       };
-      
+
       // Function to count license types
       const getLicenseTypes = (item: any) => {
-        const itemId = item.Id || 'Unknown';
+        const itemId = item.Id || "Unknown";
         const result = {
           userLicenses: 0,
           leaverLicenses: 0,
           timesheetLicenses: 0,
           directoryLicenses: 0,
           workflowLicenses: 0,
-          otherLicenses: 0
+          otherLicenses: 0,
         };
-        
+
         // User licenses - try both columns and be more detailed in logging
-        const ul1Column = findColumn(item, ['User_licenses1__c']);
-        const ultColumn = findColumn(item, ['User_Licenses_Total__c']);
-        
-        if (ul1Column && item[ul1Column] !== undefined && item[ul1Column] !== null) {
+        const ul1Column = findColumn(item, ["User_licenses1__c"]);
+        const ultColumn = findColumn(item, ["User_Licenses_Total__c"]);
+
+        if (
+          ul1Column &&
+          item[ul1Column] !== undefined &&
+          item[ul1Column] !== null
+        ) {
           const rawValue = item[ul1Column];
-          log(LOG_LEVEL.INFO, `Deal ${itemId}: User_licenses1__c raw value: "${rawValue}", type: ${typeof rawValue}`);
-          
+          log(
+            LOG_LEVEL.INFO,
+            `Deal ${itemId}: User_licenses1__c raw value: "${rawValue}", type: ${typeof rawValue}`
+          );
+
           // Try to parse the value properly
-          if (typeof rawValue === 'string') {
+          if (typeof rawValue === "string") {
             // Remove any non-numeric characters except decimal point
-            const cleanedValue = rawValue.replace(/[^0-9.]/g, '');
+            const cleanedValue = rawValue.replace(/[^0-9.]/g, "");
             if (cleanedValue) {
               result.userLicenses = parseFloat(cleanedValue) || 0;
             }
-          } else if (typeof rawValue === 'number') {
+          } else if (typeof rawValue === "number") {
             result.userLicenses = rawValue;
           }
-          
-          log(LOG_LEVEL.INFO, `Deal ${itemId}: Parsed userLicenses value: ${result.userLicenses}`);
-        } else if (ultColumn && item[ultColumn] !== undefined && item[ultColumn] !== null) {
+
+          log(
+            LOG_LEVEL.INFO,
+            `Deal ${itemId}: Parsed userLicenses value: ${result.userLicenses}`
+          );
+        } else if (
+          ultColumn &&
+          item[ultColumn] !== undefined &&
+          item[ultColumn] !== null
+        ) {
           const rawValue = item[ultColumn];
-          log(LOG_LEVEL.INFO, `Deal ${itemId}: User_Licenses_Total__c raw value: "${rawValue}", type: ${typeof rawValue}`);
-          
+          log(
+            LOG_LEVEL.INFO,
+            `Deal ${itemId}: User_Licenses_Total__c raw value: "${rawValue}", type: ${typeof rawValue}`
+          );
+
           // Try to parse the value properly
-          if (typeof rawValue === 'string') {
+          if (typeof rawValue === "string") {
             // Remove any non-numeric characters except decimal point
-            const cleanedValue = rawValue.replace(/[^0-9.]/g, '');
+            const cleanedValue = rawValue.replace(/[^0-9.]/g, "");
             if (cleanedValue) {
               result.userLicenses = parseFloat(cleanedValue) || 0;
             }
-          } else if (typeof rawValue === 'number') {
+          } else if (typeof rawValue === "number") {
             result.userLicenses = rawValue;
           }
-          
-          log(LOG_LEVEL.INFO, `Deal ${itemId}: Parsed userLicenses value: ${result.userLicenses}`);
+
+          log(
+            LOG_LEVEL.INFO,
+            `Deal ${itemId}: Parsed userLicenses value: ${result.userLicenses}`
+          );
         }
-        
+
         // Leaver licenses
-        const leaverLicensesColumn = findColumn(item, ['Leavers_Licenses__c']);
-        if (leaverLicensesColumn && item[leaverLicensesColumn] !== undefined && item[leaverLicensesColumn] !== null) {
+        const leaverLicensesColumn = findColumn(item, ["Leavers_Licenses__c"]);
+        if (
+          leaverLicensesColumn &&
+          item[leaverLicensesColumn] !== undefined &&
+          item[leaverLicensesColumn] !== null
+        ) {
           const rawValue = item[leaverLicensesColumn];
-          if (typeof rawValue === 'string') {
-            const cleanedValue = rawValue.replace(/[^0-9.]/g, '');
+          if (typeof rawValue === "string") {
+            const cleanedValue = rawValue.replace(/[^0-9.]/g, "");
             if (cleanedValue) {
               result.leaverLicenses = parseFloat(cleanedValue) || 0;
             }
-          } else if (typeof rawValue === 'number') {
+          } else if (typeof rawValue === "number") {
             result.leaverLicenses = rawValue;
           }
         }
-        
+
         // Timesheet licenses
-        const timesheetLicensesColumn = findColumn(item, ['Time_Submission_Licenses__c', 'Time_Tracking_Licenses__c']);
-        if (timesheetLicensesColumn && item[timesheetLicensesColumn] !== undefined && item[timesheetLicensesColumn] !== null) {
+        const timesheetLicensesColumn = findColumn(item, [
+          "Time_Submission_Licenses__c",
+          "Time_Tracking_Licenses__c",
+        ]);
+        if (
+          timesheetLicensesColumn &&
+          item[timesheetLicensesColumn] !== undefined &&
+          item[timesheetLicensesColumn] !== null
+        ) {
           const rawValue = item[timesheetLicensesColumn];
-          if (typeof rawValue === 'string') {
-            const cleanedValue = rawValue.replace(/[^0-9.]/g, '');
+          if (typeof rawValue === "string") {
+            const cleanedValue = rawValue.replace(/[^0-9.]/g, "");
             if (cleanedValue) {
               result.timesheetLicenses = parseFloat(cleanedValue) || 0;
             }
-          } else if (typeof rawValue === 'number') {
+          } else if (typeof rawValue === "number") {
             result.timesheetLicenses = rawValue;
           }
         }
-        
+
         // Directory licenses
-        const directoryLicensesColumn = findColumn(item, ['Directory_Licenses__c']);
-        if (directoryLicensesColumn && item[directoryLicensesColumn] !== undefined && item[directoryLicensesColumn] !== null) {
+        const directoryLicensesColumn = findColumn(item, [
+          "Directory_Licenses__c",
+        ]);
+        if (
+          directoryLicensesColumn &&
+          item[directoryLicensesColumn] !== undefined &&
+          item[directoryLicensesColumn] !== null
+        ) {
           const rawValue = item[directoryLicensesColumn];
-          if (typeof rawValue === 'string') {
-            const cleanedValue = rawValue.replace(/[^0-9.]/g, '');
+          if (typeof rawValue === "string") {
+            const cleanedValue = rawValue.replace(/[^0-9.]/g, "");
             if (cleanedValue) {
               result.directoryLicenses = parseFloat(cleanedValue) || 0;
             }
-          } else if (typeof rawValue === 'number') {
+          } else if (typeof rawValue === "number") {
             result.directoryLicenses = rawValue;
           }
         }
-        
+
         // Workflow licenses
-        const workflowLicensesColumn = findColumn(item, ['Workflow_Builder_Pro_Licenses__c']);
-        if (workflowLicensesColumn && item[workflowLicensesColumn] !== undefined && item[workflowLicensesColumn] !== null) {
+        const workflowLicensesColumn = findColumn(item, [
+          "Workflow_Builder_Pro_Licenses__c",
+        ]);
+        if (
+          workflowLicensesColumn &&
+          item[workflowLicensesColumn] !== undefined &&
+          item[workflowLicensesColumn] !== null
+        ) {
           const rawValue = item[workflowLicensesColumn];
-          if (typeof rawValue === 'string') {
-            const cleanedValue = rawValue.replace(/[^0-9.]/g, '');
+          if (typeof rawValue === "string") {
+            const cleanedValue = rawValue.replace(/[^0-9.]/g, "");
             if (cleanedValue) {
               result.workflowLicenses = parseFloat(cleanedValue) || 0;
             }
-          } else if (typeof rawValue === 'number') {
+          } else if (typeof rawValue === "number") {
             result.workflowLicenses = rawValue;
           }
         }
-        
+
         return result;
       };
-      
-      // Function to calculate total modules for a deal
+
+      // Function to calculate number of modules sold per deal (distinct module types)
       const getTotalModules = (item: any) => {
-        let total = 0;
-        const itemId = item.Id || 'Unknown';
-        
-        // Try to use NumberOfModules if it exists
-        if (modulesColumn && item[modulesColumn]) {
-          const moduleCount = parseFloat(item[modulesColumn]);
-          if (!isNaN(moduleCount) && moduleCount > 0) {
-            log(LOG_LEVEL.INFO, `Deal ${itemId}: Using primary module column value: ${moduleCount}`);
-            return moduleCount; // If this column exists with value, use it as definitive source
-          }
-        }
-        
-        // Otherwise sum up all license types
+        // Get counts for each license type field
         const licenseTypes = getLicenseTypes(item);
-        
-        // For User_licenses1__c, log the exact raw value to help debug
-        const userLicensesColumn = findColumn(item, ['User_licenses1__c']);
-        if (userLicensesColumn) {
-          log(LOG_LEVEL.INFO, `Deal ${itemId}: Raw User_licenses1__c value: "${item[userLicensesColumn]}", type: ${typeof item[userLicensesColumn]}`);
-        }
-        
-        total = licenseTypes.userLicenses + 
-                licenseTypes.leaverLicenses + 
-                licenseTypes.timesheetLicenses + 
-                licenseTypes.directoryLicenses + 
-                licenseTypes.workflowLicenses + 
-                licenseTypes.otherLicenses;
-        
-        // Log detailed breakdown
-        log(LOG_LEVEL.INFO, `Deal ${itemId} module breakdown - ` + 
-            `User: ${licenseTypes.userLicenses} (Type: ${typeof licenseTypes.userLicenses}), ` + 
-            `Leaver: ${licenseTypes.leaverLicenses}, ` + 
-            `Timesheet: ${licenseTypes.timesheetLicenses}, ` + 
-            `Directory: ${licenseTypes.directoryLicenses}, ` + 
-            `Workflow: ${licenseTypes.workflowLicenses}, ` +
-            `Total: ${total}`);
-        
-        return total;
+        // Count each module type as one if seats > 0
+        const moduleCount = Object.values(licenseTypes).filter(
+          (count) => count > 0
+        ).length;
+        return moduleCount;
       };
-      
+
       // Initialize counters for different sales categories
       let newDirectCount = 0;
       let newPartnerCount = 0;
@@ -262,23 +296,28 @@ export async function processSalesData(): Promise<SalesDataPoint[]> {
       let existingPartnerCount = 0;
       let selfServiceCount = 0;
       let unknownCategoryCount = 0;
-      
+
       salesforceData.forEach((item, index) => {
         try {
           if (!item[dateColumn]) {
             log(LOG_LEVEL.WARN, `Missing date in sales row ${index}`);
             return;
           }
-          
+
           const date = parseDate(item[dateColumn]);
           if (!date) {
-            log(LOG_LEVEL.WARN, `Invalid date in sales data: ${item[dateColumn]}`);
+            log(
+              LOG_LEVEL.WARN,
+              `Invalid date in sales data: ${item[dateColumn]}`
+            );
             return;
           }
-          
+
           // Create month key (YYYY-MM)
-          const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-          
+          const monthKey = `${date.getFullYear()}-${String(
+            date.getMonth() + 1
+          ).padStart(2, "0")}`;
+
           if (!dataByMonth.has(monthKey)) {
             dataByMonth.set(monthKey, {
               // Categories
@@ -288,7 +327,7 @@ export async function processSalesData(): Promise<SalesDataPoint[]> {
               existingPartner: [],
               selfService: [],
               unknown: [],
-              
+
               // License types
               licenseTypes: {
                 userLicenses: 0,
@@ -296,35 +335,39 @@ export async function processSalesData(): Promise<SalesDataPoint[]> {
                 timesheetLicenses: 0,
                 directoryLicenses: 0,
                 workflowLicenses: 0,
-                otherLicenses: 0
-              }
+                otherLicenses: 0,
+              },
             });
           }
-          
+
           // Get values
           const amount = parseFloat(item[amountColumn]) || 0;
           const modules = getTotalModules(item);
-          
+
           // Add to appropriate category based on Channel__c
           const salesCategory = getSalesCategory(item);
-          switch(salesCategory) {
-            case 'new-direct':
+          switch (salesCategory) {
+            case "new-direct":
               dataByMonth.get(monthKey).newDirect.push({ amount, modules });
               newDirectCount++;
               break;
-            case 'new-partner':
+            case "new-partner":
               dataByMonth.get(monthKey).newPartner.push({ amount, modules });
               newPartnerCount++;
               break;
-            case 'existing-client':
-              dataByMonth.get(monthKey).existingClient.push({ amount, modules });
+            case "existing-client":
+              dataByMonth
+                .get(monthKey)
+                .existingClient.push({ amount, modules });
               existingClientCount++;
               break;
-            case 'existing-partner':
-              dataByMonth.get(monthKey).existingPartner.push({ amount, modules });
+            case "existing-partner":
+              dataByMonth
+                .get(monthKey)
+                .existingPartner.push({ amount, modules });
               existingPartnerCount++;
               break;
-            case 'self-service':
+            case "self-service":
               dataByMonth.get(monthKey).selfService.push({ amount, modules });
               selfServiceCount++;
               break;
@@ -332,29 +375,38 @@ export async function processSalesData(): Promise<SalesDataPoint[]> {
               dataByMonth.get(monthKey).unknown.push({ amount, modules });
               unknownCategoryCount++;
           }
-          
+
           // Count license types
           const licenseTypes = getLicenseTypes(item);
           const monthData = dataByMonth.get(monthKey);
           monthData.licenseTypes.userLicenses += licenseTypes.userLicenses;
           monthData.licenseTypes.leaverLicenses += licenseTypes.leaverLicenses;
-          monthData.licenseTypes.timesheetLicenses += licenseTypes.timesheetLicenses;
-          monthData.licenseTypes.directoryLicenses += licenseTypes.directoryLicenses;
-          monthData.licenseTypes.workflowLicenses += licenseTypes.workflowLicenses;
+          monthData.licenseTypes.timesheetLicenses +=
+            licenseTypes.timesheetLicenses;
+          monthData.licenseTypes.directoryLicenses +=
+            licenseTypes.directoryLicenses;
+          monthData.licenseTypes.workflowLicenses +=
+            licenseTypes.workflowLicenses;
           monthData.licenseTypes.otherLicenses += licenseTypes.otherLicenses;
         } catch (error: unknown) {
-          let errorMessage = 'Unknown error';
+          let errorMessage = "Unknown error";
           if (error instanceof Error) {
             errorMessage = error.message;
-          } else if (typeof error === 'string') {
+          } else if (typeof error === "string") {
             errorMessage = error;
           }
-          log(LOG_LEVEL.ERROR, `Error processing sales row ${index}: ${errorMessage}`);
+          log(
+            LOG_LEVEL.ERROR,
+            `Error processing sales row ${index}: ${errorMessage}`
+          );
         }
       });
-      
+
       // Log sales breakdown
-      log(LOG_LEVEL.INFO, `Channel-based Sales breakdown - New Direct: ${newDirectCount}, New Partner: ${newPartnerCount}, Existing Client: ${existingClientCount}, Existing Partner: ${existingPartnerCount}, Self-service: ${selfServiceCount}, Unknown: ${unknownCategoryCount}`);
+      log(
+        LOG_LEVEL.INFO,
+        `Channel-based Sales breakdown - New Direct: ${newDirectCount}, New Partner: ${newPartnerCount}, Existing Client: ${existingClientCount}, Existing Partner: ${existingPartnerCount}, Self-service: ${selfServiceCount}, Unknown: ${unknownCategoryCount}`
+      );
 
       // Calculate metrics for each month
       const processedData: SalesDataPoint[] = [];
@@ -363,51 +415,111 @@ export async function processSalesData(): Promise<SalesDataPoint[]> {
       Array.from(dataByMonth.entries())
         .sort(([a], [b]) => a.localeCompare(b))
         .forEach(([month, data]) => {
-          const { 
+          const {
             // Categories
-            newDirect, newPartner, existingClient, existingPartner, selfService, unknown,
+            newDirect,
+            newPartner,
+            existingClient,
+            existingPartner,
+            selfService,
+            unknown,
             // License types
-            licenseTypes 
+            licenseTypes,
           } = data;
-          
+
           // Calculate metrics for each category
-          const newDirectTotalValue = newDirect.reduce((sum: number, deal: { amount: number; modules: number }) => sum + deal.amount, 0);
-          const newPartnerTotalValue = newPartner.reduce((sum: number, deal: { amount: number; modules: number }) => sum + deal.amount, 0);
-          const existingClientTotalValue = existingClient.reduce((sum: number, deal: { amount: number; modules: number }) => sum + deal.amount, 0);
-          const existingPartnerTotalValue = existingPartner.reduce((sum: number, deal: { amount: number; modules: number }) => sum + deal.amount, 0);
-          const selfServiceTotalValue = selfService.reduce((sum: number, deal: { amount: number; modules: number }) => sum + deal.amount, 0);
-          const unknownTotalValue = unknown.reduce((sum: number, deal: { amount: number; modules: number }) => sum + deal.amount, 0);
-          
+          const newDirectTotalValue = newDirect.reduce(
+            (sum: number, deal: { amount: number; modules: number }) =>
+              sum + deal.amount,
+            0
+          );
+          const newPartnerTotalValue = newPartner.reduce(
+            (sum: number, deal: { amount: number; modules: number }) =>
+              sum + deal.amount,
+            0
+          );
+          const existingClientTotalValue = existingClient.reduce(
+            (sum: number, deal: { amount: number; modules: number }) =>
+              sum + deal.amount,
+            0
+          );
+          const existingPartnerTotalValue = existingPartner.reduce(
+            (sum: number, deal: { amount: number; modules: number }) =>
+              sum + deal.amount,
+            0
+          );
+          const selfServiceTotalValue = selfService.reduce(
+            (sum: number, deal: { amount: number; modules: number }) =>
+              sum + deal.amount,
+            0
+          );
+          const unknownTotalValue = unknown.reduce(
+            (sum: number, deal: { amount: number; modules: number }) =>
+              sum + deal.amount,
+            0
+          );
+
           // Calculate combined metrics
-          const totalValue = newDirectTotalValue + newPartnerTotalValue + existingClientTotalValue + 
-                            existingPartnerTotalValue + selfServiceTotalValue + unknownTotalValue;
-          
-          const totalCount = newDirect.length + newPartner.length + existingClient.length +
-                            existingPartner.length + selfService.length + unknown.length;
-          
-          // For average modules calculation, use new direct sales data
-          const totalModules = newDirect.reduce((sum: number, deal: { modules: number }) => sum + (deal.modules || 0), 0);
-          const modulesCount = newDirect.length;
-          
+          const totalValue =
+            newDirectTotalValue +
+            newPartnerTotalValue +
+            existingClientTotalValue +
+            existingPartnerTotalValue +
+            selfServiceTotalValue +
+            unknownTotalValue;
+
+          const totalCount =
+            newDirect.length +
+            newPartner.length +
+            existingClient.length +
+            existingPartner.length +
+            selfService.length +
+            unknown.length;
+
+          // For average modules calculation, consider new prospect and partner deals
+          const totalModulesNewDeals =
+            newDirect.reduce(
+              (sum: number, deal: { modules: number }) =>
+                sum + (deal.modules || 0),
+              0
+            ) +
+            newPartner.reduce(
+              (sum: number, deal: { modules: number }) =>
+                sum + (deal.modules || 0),
+              0
+            );
+          const modulesCountNewDeals = newDirect.length + newPartner.length;
+
           // Calculate overall ARPA
-          const avgRevenuePerAccount = totalCount > 0 ? totalValue / totalCount : 0;
-          
+          const avgRevenuePerAccount =
+            totalCount > 0 ? totalValue / totalCount : 0;
+
           // Calculate ARR and ARR growth
-          const currentMonthTotalARR = totalValue * 12; 
-          const arrGrowth = previousMonthTotalARR > 0 
-            ? ((currentMonthTotalARR - previousMonthTotalARR) / previousMonthTotalARR) * 100
-            : 0;
-          
+          const currentMonthTotalARR = totalValue * 12;
+          const arrGrowth =
+            previousMonthTotalARR > 0
+              ? ((currentMonthTotalARR - previousMonthTotalARR) /
+                  previousMonthTotalARR) *
+                100
+              : 0;
+
           previousMonthTotalARR = currentMonthTotalARR;
-          
+
           // Store ARR values for trailing calculations
-          const arrValues = processedData.length > 0 
-            ? [...processedData[processedData.length - 1].arrValues.slice(-2), arrGrowth] 
-            : [0, 0, arrGrowth];
-          
+          const arrValues =
+            processedData.length > 0
+              ? [
+                  ...processedData[processedData.length - 1].arrValues.slice(
+                    -2
+                  ),
+                  arrGrowth,
+                ]
+              : [0, 0, arrGrowth];
+
           // Calculate 3-month trailing average for ARR growth (smoother trend)
-          const arrGrowthSmoothed = (arrValues[0] + arrValues[1] + arrValues[2]) / 3;
-          
+          const arrGrowthSmoothed =
+            (arrValues[0] + arrValues[1] + arrValues[2]) / 3;
+
           processedData.push({
             date: month,
             // New channel-based metrics
@@ -421,7 +533,7 @@ export async function processSalesData(): Promise<SalesDataPoint[]> {
             existingPartnerClientValue: existingPartnerTotalValue,
             selfServiceCount: selfService.length,
             selfServiceValue: selfServiceTotalValue,
-            
+
             // License type metrics
             userLicensesCount: licenseTypes.userLicenses,
             leaverLicensesCount: licenseTypes.leaverLicenses,
@@ -429,31 +541,37 @@ export async function processSalesData(): Promise<SalesDataPoint[]> {
             directoryLicensesCount: licenseTypes.directoryLicenses,
             workflowLicensesCount: licenseTypes.workflowLicenses,
             otherLicensesCount: licenseTypes.otherLicenses,
-            
+
             // Combined metrics
             totalSalesCount: totalCount,
             averageOrderValue: totalCount > 0 ? totalValue / totalCount : 0,
-            averageModulesPerClient: modulesCount > 0 ? totalModules / modulesCount : 0,
+            averageModulesPerClient:
+              modulesCountNewDeals > 0
+                ? totalModulesNewDeals / modulesCountNewDeals + 1
+                : 0,
             avgRevenuePerAccount,
             arrGrowth,
             arrGrowthSmoothed,
             arrValues,
             _synthetic: {
-              data: false // This is real data
-            }
+              data: false, // This is real data
+            },
           });
         });
 
-      log(LOG_LEVEL.INFO, `Processed ${processedData.length} sales data points`);
+      log(
+        LOG_LEVEL.INFO,
+        `Processed ${processedData.length} sales data points`
+      );
       return processedData;
     }
-    
+
     return [];
   } catch (error: unknown) {
-    let errorMessage = 'Unknown error';
+    let errorMessage = "Unknown error";
     if (error instanceof Error) {
       errorMessage = error.message;
-    } else if (typeof error === 'string') {
+    } else if (typeof error === "string") {
       errorMessage = error;
     }
     log(LOG_LEVEL.ERROR, `Sales data processing failed: ${errorMessage}`);

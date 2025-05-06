@@ -1,14 +1,14 @@
 // Layout storage utility functions
 
 // Keys for storing layout preferences
-export const PRODUCT_CHARTS_LAYOUT_KEY = 'analytics_product_charts_layout';
-export const SALES_CHARTS_LAYOUT_KEY = 'analytics_sales_charts_layout';
-export const CSAT_CHARTS_LAYOUT_KEY = 'analytics_csat_charts_layout';
+export const PRODUCT_CHARTS_LAYOUT_KEY = "analytics_product_charts_layout";
+export const SALES_CHARTS_LAYOUT_KEY = "analytics_sales_charts_layout";
+export const CSAT_CHARTS_LAYOUT_KEY = "analytics_csat_charts_layout";
 
 // Type definitions for layout configuration
 export interface ChartLayoutItem {
   id: string;
-  width: 'half' | 'full';
+  width: "half" | "full";
   position: number;
 }
 
@@ -17,7 +17,7 @@ export type ChartLayoutConfig = ChartLayoutItem[];
 // Save layout to localStorage
 export function saveLayoutConfig(key: string, layout: ChartLayoutConfig): void {
   try {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       localStorage.setItem(key, JSON.stringify(layout));
       console.log(`Layout saved for ${key}:`, layout);
     }
@@ -29,7 +29,7 @@ export function saveLayoutConfig(key: string, layout: ChartLayoutConfig): void {
 // Load layout from localStorage
 export function loadLayoutConfig(key: string): ChartLayoutConfig | null {
   try {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const storedLayout = localStorage.getItem(key);
       if (storedLayout) {
         return JSON.parse(storedLayout) as ChartLayoutConfig;
@@ -44,7 +44,7 @@ export function loadLayoutConfig(key: string): ChartLayoutConfig | null {
 // Reset layout to default
 export function resetLayoutConfig(key: string): void {
   try {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       localStorage.removeItem(key);
       console.log(`Layout reset for ${key}`);
     }
@@ -59,7 +59,7 @@ export function getDefaultProductChartsLayout(): ChartLayoutConfig {
     { id: "userLogins", width: "half", position: 0 },
     { id: "absencesBooked", width: "half", position: 1 },
     { id: "timesheetsSubmitted", width: "half", position: 2 },
-    { id: "workflowsCreated", width: "half", position: 3 }
+    { id: "workflowsCreated", width: "half", position: 3 },
   ];
 }
 
@@ -71,7 +71,8 @@ export function getDefaultSalesChartsLayout(): ChartLayoutConfig {
     { id: "arrGrowth", width: "half", position: 2 },
     { id: "licenseTypes", width: "half", position: 3 },
     { id: "salesCount", width: "half", position: 4 },
-    { id: "totalSalesValue", width: "half", position: 5 }
+    { id: "totalSalesValue", width: "half", position: 5 },
+    { id: "averageModulesSold", width: "half", position: 6 },
   ];
 }
 
@@ -81,6 +82,6 @@ export function getDefaultCSATChartsLayout(): ChartLayoutConfig {
     { id: "monthlyTickets", width: "full", position: 0 },
     { id: "helpTopics", width: "half", position: 1 },
     { id: "impactLevel", width: "half", position: 2 },
-    { id: "ticketTypes", width: "full", position: 3 }
+    { id: "ticketTypes", width: "full", position: 3 },
   ];
 }

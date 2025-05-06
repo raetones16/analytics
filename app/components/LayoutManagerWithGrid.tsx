@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { 
-  ChartLayoutConfig, 
-  ChartLayoutItem, 
-  saveLayoutConfig, 
-  loadLayoutConfig 
-} from '../utils/storage/layoutStorage';
+import React, { useState, useEffect } from "react";
+import {
+  ChartLayoutConfig,
+  ChartLayoutItem,
+  saveLayoutConfig,
+  loadLayoutConfig,
+} from "../utils/storage/layoutStorage";
 
 interface LayoutManagerProps {
   storageKey: string;
@@ -23,17 +23,28 @@ export function LayoutManagerWithGrid({
   isEditing,
   onSave,
   onCancel,
-  children
+  children,
 }: LayoutManagerProps) {
   // State for layout configuration
   const [layout, setLayout] = useState<ChartLayoutConfig>([]);
   const [editingLayout, setEditingLayout] = useState<ChartLayoutConfig>([]);
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
 
-  // Load layout on initial render
+  // Load layout on initial render, merging saved and default to include new charts
   useEffect(() => {
     const savedLayout = loadLayoutConfig(storageKey);
-    const initialLayout = savedLayout || defaultLayout;
+    let initialLayout: ChartLayoutConfig;
+    if (savedLayout && savedLayout.length) {
+      // Merge default items, preserving saved settings and adding any new default items
+      initialLayout = defaultLayout.map((defaultItem) => {
+        const savedItem = savedLayout.find(
+          (item) => item.id === defaultItem.id
+        );
+        return savedItem ? savedItem : defaultItem;
+      });
+    } else {
+      initialLayout = defaultLayout;
+    }
     setLayout(initialLayout);
     setEditingLayout(initialLayout);
   }, [storageKey, defaultLayout]);
@@ -48,7 +59,9 @@ export function LayoutManagerWithGrid({
   // Handle save action
   const handleSave = () => {
     // Sort by position before saving
-    const sortedLayout = [...editingLayout].sort((a, b) => a.position - b.position);
+    const sortedLayout = [...editingLayout].sort(
+      (a, b) => a.position - b.position
+    );
     saveLayoutConfig(storageKey, sortedLayout);
     setLayout(sortedLayout);
     onSave();
@@ -62,10 +75,11 @@ export function LayoutManagerWithGrid({
 
   // Handle chart width toggle
   const handleWidthToggle = (id: string) => {
-    setEditingLayout(prev => 
-      prev.map(item => {
+    setEditingLayout((prev) =>
+      prev.map((item) => {
         if (item.id === id) {
-          const newWidth: 'half' | 'full' = item.width === 'half' ? 'full' : 'half';
+          const newWidth: "half" | "full" =
+            item.width === "half" ? "full" : "half";
           return { ...item, width: newWidth };
         }
         return item;
@@ -76,57 +90,61 @@ export function LayoutManagerWithGrid({
   // Drag handlers
   const handleDragStart = (e: React.DragEvent, id: string) => {
     setDraggedItem(id);
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', id);
-    
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", id);
+
     // Add a little delay to show visual feedback
     setTimeout(() => {
-      const element = document.querySelector(`[data-chart-id="${id}"]`) as HTMLElement;
+      const element = document.querySelector(
+        `[data-chart-id="${id}"]`
+      ) as HTMLElement;
       if (element) {
-        element.classList.add('dragging');
+        element.classList.add("dragging");
       }
     }, 0);
   };
 
   const handleDragEnd = (e: React.DragEvent) => {
     // Remove dragging class from any element that might have it
-    document.querySelectorAll('.dragging').forEach(el => {
-      el.classList.remove('dragging');
+    document.querySelectorAll(".dragging").forEach((el) => {
+      el.classList.remove("dragging");
     });
-    
+
     setDraggedItem(null);
   };
 
   // Handle drag over another chart
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
+    e.dataTransfer.dropEffect = "move";
   };
 
   // Handle dropping onto another chart
   const handleDrop = (e: React.DragEvent, targetId: string) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     // Get the dragged item ID from the data transfer, or use our state variable
-    const draggedId = e.dataTransfer.getData('text/plain') || draggedItem;
-    
+    const draggedId = e.dataTransfer.getData("text/plain") || draggedItem;
+
     if (!draggedId || targetId === draggedId) return;
 
     // Find both chart items
-    const srcItem = editingLayout.find(item => item.id === draggedId);
-    const destItem = editingLayout.find(item => item.id === targetId);
+    const srcItem = editingLayout.find((item) => item.id === draggedId);
+    const destItem = editingLayout.find((item) => item.id === targetId);
     if (!srcItem || !destItem) return;
 
     // Swap positions
     const srcPos = srcItem.position;
     const destPos = destItem.position;
 
-    console.log(`Swapping ${draggedId} (pos ${srcPos}) with ${targetId} (pos ${destPos})`);
+    console.log(
+      `Swapping ${draggedId} (pos ${srcPos}) with ${targetId} (pos ${destPos})`
+    );
 
     // Update layout with swapped positions
-    setEditingLayout(prev => 
-      prev.map(item => {
+    setEditingLayout((prev) =>
+      prev.map((item) => {
         if (item.id === draggedId) {
           return { ...item, position: destPos };
         } else if (item.id === targetId) {
@@ -149,52 +167,57 @@ export function LayoutManagerWithGrid({
 
   // Get chart title
   const getChartTitle = (child: React.ReactNode): string => {
-    if (!React.isValidElement(child)) return 'Chart';
-    
+    if (!React.isValidElement(child)) return "Chart";
+
     // Try to extract the ID, which is often descriptive
-    const id = child.props.id || '';
+    const id = child.props.id || "";
     const readableId = id
-      .replace(/([A-Z])/g, ' $1') // Add space before capital letters
+      .replace(/([A-Z])/g, " $1") // Add space before capital letters
       .replace(/^./, (str: string) => str.toUpperCase()) // Capitalize first letter
       .trim(); // Cleanup extra spaces
-    
-    let title = readableId || 'Chart';
-    
+
+    let title = readableId || "Chart";
+
     // Also try to find the actual h3 title
     for (const c of React.Children.toArray(child.props.children)) {
-      if (React.isValidElement(c) && 
-          c.props && 
-          typeof c.props === 'object' &&
-          'className' in c.props && 
-          typeof c.props.className === 'string' &&
-          c.props.className.includes('flex')) {
-        
+      if (
+        React.isValidElement(c) &&
+        c.props &&
+        typeof c.props === "object" &&
+        "className" in c.props &&
+        typeof c.props.className === "string" &&
+        c.props.className.includes("flex")
+      ) {
         for (const tc of React.Children.toArray(c.props.children)) {
           // Look for an h3 element
-          if (React.isValidElement(tc) && tc.type === 'h3' && tc.props.children) {
+          if (
+            React.isValidElement(tc) &&
+            tc.type === "h3" &&
+            tc.props.children
+          ) {
             return tc.props.children;
           }
         }
       }
     }
-    
+
     return title;
   };
 
   // Create a component that hides the visualization toggle
   const ChartWithoutToggle = ({ child }: { child: React.ReactElement }) => {
     return React.cloneElement(
-      child, 
-      {}, 
+      child,
+      {},
       React.Children.map(child.props.children, (grandChild) => {
         if (
-          React.isValidElement(grandChild) && 
-          grandChild.props && 
-          typeof grandChild.props === 'object' &&
-          'className' in grandChild.props && 
-          typeof grandChild.props.className === 'string' &&
-          (grandChild.props.className.includes('flex justify-between') || 
-           grandChild.props.className.includes('items-center mb-3'))
+          React.isValidElement(grandChild) &&
+          grandChild.props &&
+          typeof grandChild.props === "object" &&
+          "className" in grandChild.props &&
+          typeof grandChild.props.className === "string" &&
+          (grandChild.props.className.includes("flex justify-between") ||
+            grandChild.props.className.includes("items-center mb-3"))
         ) {
           // Skip the toggle container
           return null;
@@ -203,7 +226,7 @@ export function LayoutManagerWithGrid({
       })
     );
   };
-  
+
   // Normal viewing mode - unchanged from original
   if (!isEditing) {
     return (
@@ -213,7 +236,7 @@ export function LayoutManagerWithGrid({
           .map((item) => (
             <div
               key={item.id}
-              className={`${item.width === 'full' ? 'md:col-span-2' : ''}`}
+              className={`${item.width === "full" ? "md:col-span-2" : ""}`}
               data-id={item.id}
             >
               {findChildById(item.id)}
@@ -256,15 +279,15 @@ export function LayoutManagerWithGrid({
           .sort((a, b) => a.position - b.position)
           .map((item) => {
             const child = findChildById(item.id);
-            
+
             return (
-              <div 
+              <div
                 key={item.id}
                 className={`
-                  relative 
+                  relative
                   edit-chart-container
-                  ${item.width === 'full' ? 'col-span-full' : 'col-span-1'} 
-                  ${draggedItem === item.id ? 'opacity-50' : ''}
+                  ${item.width === "full" ? "col-span-full" : "col-span-1"}
+                  ${draggedItem === item.id ? "opacity-50" : ""}
                 `}
                 draggable={true}
                 data-chart-id={item.id}
@@ -282,12 +305,16 @@ export function LayoutManagerWithGrid({
                     onClick={() => handleWidthToggle(item.id)}
                     className={`
                       px-3 py-1 text-xs font-medium rounded transition-colors shadow-sm
-                      ${item.width === 'half' 
-                        ? 'bg-blue-90 text-blue-30 border border-blue-70 hover:bg-blue-80' 
-                        : 'bg-blue-80 text-blue-40 border border-blue-60 hover:bg-blue-70'}
+                      ${
+                        item.width === "half"
+                          ? "bg-blue-90 text-blue-30 border border-blue-70 hover:bg-blue-80"
+                          : "bg-blue-80 text-blue-40 border border-blue-60 hover:bg-blue-70"
+                      }
                     `}
                   >
-                    {item.width === 'half' ? 'Make Full Width' : 'Make Half Width'}
+                    {item.width === "half"
+                      ? "Make Full Width"
+                      : "Make Half Width"}
                   </button>
                 </div>
 
