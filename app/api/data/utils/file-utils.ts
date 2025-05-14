@@ -220,7 +220,7 @@ export async function readCSVFile(
   options?: CSVReadOptions
 ): Promise<{ data: any[]; meta?: Papa.ParseMeta }> {
   try {
-    log(LOG_LEVEL.INFO, `Reading CSV file: ${path.basename(filePath)}`);
+    log(LOG_LEVEL.DEBUG, `Reading CSV file: ${path.basename(filePath)}`);
     const content = await fs.readFile(filePath, "utf8");
 
     // Default options with overrides from passed options
@@ -246,10 +246,10 @@ export async function readCSVFile(
 
     if (result.data.length > 0) {
       log(
-        LOG_LEVEL.INFO,
+        LOG_LEVEL.DEBUG,
         `CSV columns: ${result.meta?.fields?.join(", ") || "No columns found"}`
       );
-      log(LOG_LEVEL.INFO, `Total rows: ${result.data.length}`);
+      log(LOG_LEVEL.DEBUG, `Total rows: ${result.data.length}`);
     } else {
       log(LOG_LEVEL.WARN, `CSV file is empty or invalid`);
     }
@@ -273,7 +273,7 @@ export async function readExcelFile(
   options: ExcelReadOptions = {}
 ): Promise<any[]> {
   try {
-    log(LOG_LEVEL.INFO, `Reading Excel file: ${path.basename(filePath)}`);
+    log(LOG_LEVEL.DEBUG, `Reading Excel file: ${path.basename(filePath)}`);
     const buffer = await fs.readFile(filePath);
 
     let workbook;
@@ -317,7 +317,7 @@ export async function readExcelFile(
     }
 
     log(
-      LOG_LEVEL.INFO,
+      LOG_LEVEL.DEBUG,
       `Using sheet '${sheetNameToUse}' from file ${path.basename(filePath)}`
     );
     const sheet = workbook.Sheets[sheetNameToUse];
@@ -335,12 +335,12 @@ export async function readExcelFile(
 
     if (data.length > 0 && typeof data[0] === "object" && data[0] !== null) {
       log(
-        LOG_LEVEL.INFO,
+        LOG_LEVEL.DEBUG,
         `Excel sheet: ${sheetNameToUse}, columns: ${Object.keys(data[0]).join(
           ", "
         )}`
       );
-      log(LOG_LEVEL.INFO, `Total rows: ${data.length}`);
+      log(LOG_LEVEL.DEBUG, `Total rows: ${data.length}`);
     } else {
       log(LOG_LEVEL.WARN, `Excel sheet is empty or invalid`);
     }

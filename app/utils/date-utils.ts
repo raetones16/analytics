@@ -1,3 +1,5 @@
+import { log, LOG_LEVEL } from "../api/data/utils/logging";
+
 // Format date for display (e.g., "Jan 25")
 export function formatDateForDisplay(date: Date | null): string {
   if (!date) return "";
@@ -47,7 +49,8 @@ export function processChartData<T extends { date: string }>(
     return new Date(a.date).getTime() - new Date(b.date).getTime();
   });
 
-  console.log(
+  log(
+    LOG_LEVEL.INFO,
     `processChartData: Processed ${
       sortedData.length
     } data points, sorted from ${

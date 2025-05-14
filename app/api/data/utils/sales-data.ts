@@ -164,7 +164,7 @@ export async function processSalesData(): Promise<SalesDataPoint[]> {
         ) {
           const rawValue = item[ul1Column];
           log(
-            LOG_LEVEL.INFO,
+            LOG_LEVEL.DEBUG,
             `Deal ${itemId}: User_licenses1__c raw value: "${rawValue}", type: ${typeof rawValue}`
           );
 
@@ -180,7 +180,7 @@ export async function processSalesData(): Promise<SalesDataPoint[]> {
           }
 
           log(
-            LOG_LEVEL.INFO,
+            LOG_LEVEL.DEBUG,
             `Deal ${itemId}: Parsed userLicenses value: ${result.userLicenses}`
           );
         } else if (
@@ -190,7 +190,7 @@ export async function processSalesData(): Promise<SalesDataPoint[]> {
         ) {
           const rawValue = item[ultColumn];
           log(
-            LOG_LEVEL.INFO,
+            LOG_LEVEL.DEBUG,
             `Deal ${itemId}: User_Licenses_Total__c raw value: "${rawValue}", type: ${typeof rawValue}`
           );
 
@@ -206,7 +206,7 @@ export async function processSalesData(): Promise<SalesDataPoint[]> {
           }
 
           log(
-            LOG_LEVEL.INFO,
+            LOG_LEVEL.DEBUG,
             `Deal ${itemId}: Parsed userLicenses value: ${result.userLicenses}`
           );
         }
