@@ -5,4 +5,5 @@ export { default as LicenseTypesChart } from "./LicenseTypesChart";
 export { default as SalesCountChart } from "./SalesCountChart";
 export { default as TotalSalesValueChart } from "./TotalSalesValueChart";
 export { default as AverageModulesSoldChart } from "./AverageModulesSoldChart";
+export { default as AverageModulesAllClientsChart } from "./AverageModulesAllClientsChart";
 export * from "./types";

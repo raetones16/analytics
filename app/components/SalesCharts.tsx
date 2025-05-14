@@ -10,6 +10,7 @@ import {
   SalesCountChart,
   TotalSalesValueChart,
   AverageModulesSoldChart,
+  AverageModulesAllClientsChart,
   SalesData,
 } from "./charts/sales";
 import { VisualizationToggle } from "./VisualizationToggle";
@@ -34,6 +35,7 @@ const getDefaultSalesChartsLayout = (): {
   { id: "salesCount", position: 4, width: "half" },
   { id: "totalSalesValue", position: 5, width: "half" },
   { id: "averageModulesSold", position: 6, width: "half" },
+  { id: "averageModulesAllClients", position: 7, width: "half" },
 ];
 
 export function SalesCharts({ data }: SalesChartsProps) {
@@ -41,8 +43,12 @@ export function SalesCharts({ data }: SalesChartsProps) {
   const [hoveredChart, setHoveredChart] = useState<string | null>(null);
   // State for edit mode
   const [isEditingLayout, setIsEditingLayout] = useState(false);
-  // State for visualization preferences
-  const [visualPreferences, setVisualPreferences] = useState({
+
+  // Key for localStorage
+  const VISUAL_PREFERENCES_KEY = "sales_charts_visual_preferences";
+
+  // Default preferences
+  const defaultVisualPreferences = {
     salesByCategory: "pie",
     averageOrderValue: "line",
     arrGrowth: "line",
@@ -50,7 +56,33 @@ export function SalesCharts({ data }: SalesChartsProps) {
     salesCount: "bar",
     totalSalesValue: "line",
     averageModulesSold: "line",
+    averageModulesAllClients: "line",
+  };
+
+  // State for visualization preferences, loaded from localStorage if available
+  const [visualPreferences, setVisualPreferences] = useState(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem(VISUAL_PREFERENCES_KEY);
+        if (stored) {
+          return { ...defaultVisualPreferences, ...JSON.parse(stored) };
+        }
+      } catch (e) {
+        // Ignore parse errors
+      }
+    }
+    return defaultVisualPreferences;
   });
+
+  // Save preferences to localStorage whenever they change
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(
+        VISUAL_PREFERENCES_KEY,
+        JSON.stringify(visualPreferences)
+      );
+    }
+  }, [visualPreferences]);
 
   // Check if any data points have synthetic flags
   const hasSyntheticData = data.some((item) => item._synthetic?.data);
@@ -94,6 +126,17 @@ export function SalesCharts({ data }: SalesChartsProps) {
     };
   });
 
+  // Add state for all-clients chart data and visualization type
+  const [allClientsData, setAllClientsData] = useState<any[]>([]);
+
+  useEffect(() => {
+    // Fetch all-clients data from API
+    fetch("/api/data?type=customer-snapshots")
+      .then((res) => res.json())
+      .then((json) => setAllClientsData(json || []))
+      .catch(() => setAllClientsData([]));
+  }, []);
+
   // If we have no data, show a message
   if (!data || data.length === 0) {
     return (
@@ -129,8 +172,12 @@ export function SalesCharts({ data }: SalesChartsProps) {
   };
 
   // Function to handle visualization type changes
+  type VisualPreferences = typeof defaultVisualPreferences;
   const handleVisualizationChange = (chartName: string, value: string) => {
-    setVisualPreferences((prev) => ({ ...prev, [chartName]: value }));
+    setVisualPreferences((prev: VisualPreferences) => ({
+      ...prev,
+      [chartName]: value,
+    }));
   };
 
   return (
@@ -405,6 +452,49 @@ export function SalesCharts({ data }: SalesChartsProps) {
             data={enhancedData}
             visualizationType={
               visualPreferences.averageModulesSold as "line" | "bar" | "area"
+            }
+          />
+        </div>
+
+        {/* Average Modules Per Client (All Clients) Chart */}
+        <div
+          id="averageModulesAllClients"
+          className="bg-white p-4 rounded-lg shadow-md relative"
+          onMouseEnter={() =>
+            !isEditingLayout && setHoveredChart("averageModulesAllClients")
+          }
+          onMouseLeave={() => !isEditingLayout && setHoveredChart(null)}
+        >
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-md">
+              Average Modules Per Client (All Clients)
+            </h3>
+            <div
+              className={`transition-opacity duration-200 ${
+                hoveredChart === "averageModulesAllClients"
+                  ? "opacity-100"
+                  : "opacity-0"
+              }`}
+            >
+              <VisualizationToggle
+                current={visualPreferences.averageModulesAllClients}
+                options={[
+                  { value: "line", label: "Line" },
+                  { value: "bar", label: "Bar" },
+                  { value: "area", label: "Area" },
+                ]}
+                onChange={handleVisualizationChange}
+                chartName="averageModulesAllClients"
+              />
+            </div>
+          </div>
+          <AverageModulesAllClientsChart
+            data={allClientsData}
+            visualizationType={
+              visualPreferences.averageModulesAllClients as
+                | "line"
+                | "bar"
+                | "area"
             }
           />
         </div>

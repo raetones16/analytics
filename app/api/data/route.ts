@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import { BASE_DATA_DIR, LOG_LEVEL, log, processSalesData } from "./utils";
+import { processCustomerSnapshots } from "./utils/customer-snapshots-data";
 
 // We need to export a config to tell Next.js this route is dynamic
 export const dynamic = "force-dynamic";
@@ -34,6 +35,14 @@ export async function GET(request: Request) {
         const salesData = await processSalesData();
         log(LOG_LEVEL.INFO, `Returning ${salesData.length} sales data points`);
         return NextResponse.json(salesData);
+
+      case "customer-snapshots":
+        const snapshotData = await processCustomerSnapshots();
+        log(
+          LOG_LEVEL.INFO,
+          `Returning ${snapshotData.length} customer snapshot data points`
+        );
+        return NextResponse.json(snapshotData);
 
       case "all":
         log(LOG_LEVEL.INFO, "Processing all data types...");
