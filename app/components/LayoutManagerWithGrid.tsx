@@ -1,12 +1,23 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {
-  ChartLayoutConfig,
-  ChartLayoutItem,
-  saveLayoutConfig,
-  loadLayoutConfig,
-} from "../utils/storage/layoutStorage";
+
+export type ChartLayoutItem = {
+  id: string;
+  position: number;
+  width: "half" | "full";
+};
+
+export type ChartLayoutConfig = ChartLayoutItem[];
+
+function saveLayoutConfig(_key: string, _layout: ChartLayoutConfig) {
+  // No-op: persistent layout storage removed
+}
+
+function loadLayoutConfig(_key: string): ChartLayoutConfig | null {
+  // No-op: persistent layout storage removed
+  return null;
+}
 
 interface LayoutManagerProps {
   storageKey: string;

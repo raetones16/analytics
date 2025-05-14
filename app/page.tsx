@@ -4,8 +4,6 @@ import { useState, useEffect } from "react";
 import { DateFilter } from "./components/DateFilter";
 import { ProductCharts } from "./components/ProductCharts";
 import { SalesCharts } from "./components/SalesCharts";
-import { CSATCharts } from "./components/CSATCharts";
-import { RevisedCSATCharts } from "./components/RevisedCSATCharts";
 import { processChartData } from "./utils/date-utils";
 import { uiColors } from "./utils/theme";
 
@@ -33,35 +31,6 @@ interface SalesData {
   _synthetic?: {
     data?: boolean;
   };
-}
-
-interface CSATData {
-  date: string;
-  npsScore: number;
-  churnPercentage: number;
-  totalTickets: number;
-  supportTicketsBySeverity: {
-    low: number;
-    medium: number;
-    high: number;
-    urgent: number;
-  };
-  supportTopics: {
-    [key: string]: number;
-  };
-  ticketTypes: {
-    [key: string]: number;
-  };
-  ticketsByGroup?: {
-    [key: string]: number;
-  };
-  _synthetic?:
-    | {
-        nps?: boolean;
-        churn?: boolean;
-        tickets?: boolean;
-      }
-    | boolean;
 }
 
 // Helper function for filtering data by date
@@ -177,92 +146,10 @@ const mockSalesData: SalesData[] = [
   },
 ];
 
-const mockCSATData: CSATData[] = [
-  {
-    date: "2025-01-01",
-    npsScore: 7.8,
-    churnPercentage: 2.3,
-    totalTickets: 276,
-    supportTicketsBySeverity: {
-      low: 145,
-      medium: 87,
-      high: 32,
-      urgent: 12,
-    },
-    supportTopics: {
-      "Login Issues": 42,
-      Reporting: 38,
-      "Mobile App": 35,
-      Integrations: 30,
-      Workflows: 24,
-      Others: 107,
-    },
-    ticketTypes: {
-      Question: 120,
-      Problem: 85,
-      "Feature Request": 45,
-      Other: 26,
-    },
-  },
-  {
-    date: "2025-02-01",
-    npsScore: 8.1,
-    churnPercentage: 2.1,
-    totalTickets: 283,
-    supportTicketsBySeverity: {
-      low: 152,
-      medium: 93,
-      high: 28,
-      urgent: 10,
-    },
-    supportTopics: {
-      "Login Issues": 39,
-      Reporting: 42,
-      "Mobile App": 31,
-      Integrations: 36,
-      Workflows: 29,
-      Others: 106,
-    },
-    ticketTypes: {
-      Question: 115,
-      Problem: 90,
-      "Feature Request": 50,
-      Other: 28,
-    },
-  },
-  {
-    date: "2025-03-01",
-    npsScore: 8.3,
-    churnPercentage: 1.9,
-    totalTickets: 282,
-    supportTicketsBySeverity: {
-      low: 163,
-      medium: 86,
-      high: 25,
-      urgent: 8,
-    },
-    supportTopics: {
-      "Login Issues": 36,
-      Reporting: 45,
-      "Mobile App": 28,
-      Integrations: 38,
-      Workflows: 32,
-      Others: 103,
-    },
-    ticketTypes: {
-      Question: 105,
-      Problem: 85,
-      "Feature Request": 60,
-      Other: 32,
-    },
-  },
-];
-
 export default function Dashboard() {
   const [dateRange, setDateRange] = useState<DateRangeType>("quarter");
   const [productData, setProductData] = useState<ProductUsageData[]>([]);
   const [salesData, setSalesData] = useState<SalesData[]>([]);
-  const [csatData, setCSATData] = useState<CSATData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dataSource, setDataSource] = useState<"api" | "mock">("api");
@@ -280,19 +167,11 @@ export default function Dashboard() {
         if (response.ok) {
           const data = await response.json();
           // Add detailed console logging for data
-          console.log(`Data from API - Product: ${data.productData?.length || 0}, Sales: ${data.salesData?.length || 0}, CSAT: ${data.csatData?.length || 0}`);
-          
-          if (data.csatData && data.csatData.length > 0) {
-            // Log CSAT ticket totals to verify data
-            const totalCsatTickets = data.csatData.reduce((sum: number, item: CSATData) => sum + item.totalTickets, 0);
-            console.log(`Total CSAT tickets in API data: ${totalCsatTickets}`);
-            
-            // Log month range
-            const csatDates = data.csatData.map((item: CSATData) => new Date(item.date));
-            const oldestDate = new Date(Math.min(...csatDates.map((d: Date) => d.getTime())));
-            const newestDate = new Date(Math.max(...csatDates.map((d: Date) => d.getTime())));
-            console.log(`CSAT date range: ${oldestDate.toISOString().split('T')[0]} to ${newestDate.toISOString().split('T')[0]}`);
-          }
+          console.log(
+            `Data from API - Product: ${
+              data.productData?.length || 0
+            }, Sales: ${data.salesData?.length || 0}`
+          );
 
           // Check if we received data for each category
           const hasProductData =
@@ -303,13 +182,9 @@ export default function Dashboard() {
             data.salesData &&
             Array.isArray(data.salesData) &&
             data.salesData.length > 0;
-          const hasCSATData =
-            data.csatData &&
-            Array.isArray(data.csatData) &&
-            data.csatData.length > 0;
 
           console.log(
-            `Data availability - Product: ${hasProductData}, Sales: ${hasSalesData}, CSAT: ${hasCSATData}`
+            `Data availability - Product: ${hasProductData}, Sales: ${hasSalesData}`
           );
 
           // Use fetched data if available, otherwise fall back to mock data
@@ -317,14 +192,11 @@ export default function Dashboard() {
             ? data.productData
             : mockProductData;
           const salesDataSource = hasSalesData ? data.salesData : mockSalesData;
-          const csatDataSource = hasCSATData ? data.csatData : mockCSATData;
 
           // Set data source flag based on whether we're using real or mock data
-          setDataSource(
-            hasProductData && hasSalesData && hasCSATData ? "api" : "mock"
-          );
+          setDataSource(hasProductData && hasSalesData ? "api" : "mock");
 
-          if (!hasProductData || !hasSalesData || !hasCSATData) {
+          if (!hasProductData || !hasSalesData) {
             setError(
               "Some data could not be loaded from the API. Using fallback data where needed."
             );
@@ -340,13 +212,9 @@ export default function Dashboard() {
             salesDataSource,
             dateRange
           );
-          const filteredCSATData = filterDataByDateRange(
-            csatDataSource,
-            dateRange
-          );
 
           console.log(
-            `Filtered data counts - Product: ${filteredProductData.length}, Sales: ${filteredSalesData.length}, CSAT: ${filteredCSATData.length}`
+            `Filtered data counts - Product: ${filteredProductData.length}, Sales: ${filteredSalesData.length}`
           );
 
           // Process data with consistent date formatting and ordering
@@ -356,13 +224,9 @@ export default function Dashboard() {
           const processedSalesData = processChartData(
             filteredSalesData as SalesData[]
           );
-          const processedCSATData = processChartData(
-            filteredCSATData as CSATData[]
-          );
 
           setProductData(processedProductData);
           setSalesData(processedSalesData);
-          setCSATData(processedCSATData);
         } else {
           // If API fails, use mock data
           const errorText = await response.text();
@@ -379,10 +243,6 @@ export default function Dashboard() {
             mockSalesData,
             dateRange
           );
-          const filteredCSATData = filterDataByDateRange(
-            mockCSATData,
-            dateRange
-          );
 
           // Process data with consistent date formatting and ordering
           const processedProductData = processChartData(
@@ -391,13 +251,9 @@ export default function Dashboard() {
           const processedSalesData = processChartData(
             filteredSalesData as SalesData[]
           );
-          const processedCSATData = processChartData(
-            filteredCSATData as CSATData[]
-          );
 
           setProductData(processedProductData);
           setSalesData(processedSalesData);
-          setCSATData(processedCSATData);
         }
       } catch (error) {
         console.error("Error loading data:", error);
@@ -417,7 +273,6 @@ export default function Dashboard() {
           mockSalesData,
           dateRange
         );
-        const filteredCSATData = filterDataByDateRange(mockCSATData, dateRange);
 
         // Process data with consistent date formatting and ordering
         const processedProductData = processChartData(
@@ -426,13 +281,9 @@ export default function Dashboard() {
         const processedSalesData = processChartData(
           filteredSalesData as SalesData[]
         );
-        const processedCSATData = processChartData(
-          filteredCSATData as CSATData[]
-        );
 
         setProductData(processedProductData);
         setSalesData(processedSalesData);
-        setCSATData(processedCSATData);
       } finally {
         setIsLoading(false);
       }
@@ -456,7 +307,9 @@ export default function Dashboard() {
       </header>
 
       {error && (
-        <div className={`${uiColors.warning.bg} border-l-4 ${uiColors.warning.border} p-4 mb-6`}>
+        <div
+          className={`${uiColors.warning.bg} border-l-4 ${uiColors.warning.border} p-4 mb-6`}
+        >
           <div className="flex">
             <div className="ml-3">
               <p className={uiColors.warning.text}>{error}</p>
@@ -466,7 +319,9 @@ export default function Dashboard() {
       )}
 
       {dataSource === "mock" && !error && (
-        <div className={`${uiColors.info.bg} border-l-4 ${uiColors.info.border} p-4 mb-6`}>
+        <div
+          className={`${uiColors.info.bg} border-l-4 ${uiColors.info.border} p-4 mb-6`}
+        >
           <div className="flex">
             <div className="ml-3">
               <p className={uiColors.info.text}>
@@ -492,7 +347,6 @@ export default function Dashboard() {
           <div className="mb-12">
             <SalesCharts data={salesData} />
           </div>
-          <RevisedCSATCharts data={csatData} dateRange={dateRange} />
         </>
       )}
     </div>

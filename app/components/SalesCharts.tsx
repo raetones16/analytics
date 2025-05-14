@@ -13,20 +13,28 @@ import {
   SalesData,
 } from "./charts/sales";
 import { VisualizationToggle } from "./VisualizationToggle";
-import {
-  saveVisualizationPreferences,
-  loadVisualizationPreferences,
-} from "../utils/storage/localStorage";
 import { LayoutManagerWithGrid } from "./LayoutManagerWithGrid";
 import { EditLayoutButton } from "./EditLayoutButton";
-import {
-  SALES_CHARTS_LAYOUT_KEY,
-  getDefaultSalesChartsLayout,
-} from "../utils/storage/layoutStorage";
 
 interface SalesChartsProps {
   data: SalesData[];
 }
+
+// Define local fallback constants
+const SALES_CHARTS_LAYOUT_KEY = "sales_charts_layout";
+const getDefaultSalesChartsLayout = (): {
+  id: string;
+  position: number;
+  width: "half" | "full";
+}[] => [
+  { id: "salesByCategory", position: 0, width: "half" },
+  { id: "averageOrderValue", position: 1, width: "half" },
+  { id: "arrGrowth", position: 2, width: "half" },
+  { id: "licenseTypes", position: 3, width: "half" },
+  { id: "salesCount", position: 4, width: "half" },
+  { id: "totalSalesValue", position: 5, width: "half" },
+  { id: "averageModulesSold", position: 6, width: "half" },
+];
 
 export function SalesCharts({ data }: SalesChartsProps) {
   // State for hover over charts
@@ -43,47 +51,6 @@ export function SalesCharts({ data }: SalesChartsProps) {
     totalSalesValue: "line",
     averageModulesSold: "line",
   });
-
-  // On initial load, load preferences from localStorage
-  useEffect(() => {
-    const storedPrefs = loadVisualizationPreferences();
-    if (storedPrefs) {
-      // Only update for Sales chart preferences
-      const salesPrefs = {
-        salesByCategory:
-          storedPrefs.salesByCategory || visualPreferences.salesByCategory,
-        averageOrderValue:
-          storedPrefs.averageOrderValue || visualPreferences.averageOrderValue,
-        arrGrowth: storedPrefs.arrGrowth || visualPreferences.arrGrowth,
-        licenseTypes:
-          storedPrefs.licenseTypes || visualPreferences.licenseTypes,
-        salesCount: storedPrefs.salesCount || visualPreferences.salesCount,
-        totalSalesValue:
-          storedPrefs.totalSalesValue || visualPreferences.totalSalesValue,
-        averageModulesSold:
-          storedPrefs.averageModulesSold ||
-          visualPreferences.averageModulesSold,
-      };
-      setVisualPreferences((prev) => ({ ...prev, ...salesPrefs }));
-    }
-  }, []);
-
-  // Function to handle visualization type changes
-  const handleVisualizationChange = (chartName: string, value: string) => {
-    const newPrefs = {
-      ...visualPreferences,
-      [chartName]: value,
-    };
-
-    setVisualPreferences(newPrefs);
-
-    // Save to localStorage
-    const storedPrefs = loadVisualizationPreferences();
-    saveVisualizationPreferences({
-      ...storedPrefs,
-      [chartName]: value,
-    });
-  };
 
   // Check if any data points have synthetic flags
   const hasSyntheticData = data.some((item) => item._synthetic?.data);
@@ -159,6 +126,11 @@ export function SalesCharts({ data }: SalesChartsProps) {
   // Function to handle cancel
   const handleCancelLayout = () => {
     setIsEditingLayout(false);
+  };
+
+  // Function to handle visualization type changes
+  const handleVisualizationChange = (chartName: string, value: string) => {
+    setVisualPreferences((prev) => ({ ...prev, [chartName]: value }));
   };
 
   return (

@@ -1,12 +1,6 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { 
-  ChartLayoutConfig, 
-  ChartLayoutItem, 
-  saveLayoutConfig, 
-  loadLayoutConfig 
-} from '../utils/storage/layoutStorage';
+import React, { useState, useEffect } from "react";
 
 interface LayoutManagerProps {
   storageKey: string;
@@ -17,13 +11,30 @@ interface LayoutManagerProps {
   children: React.ReactNode;
 }
 
+// Inline types
+export type ChartLayoutItem = {
+  id: string;
+  position: number;
+  width: "half" | "full";
+};
+export type ChartLayoutConfig = ChartLayoutItem[];
+
+// Replace save/load with no-ops
+function saveLayoutConfig(_key: string, _layout: ChartLayoutConfig) {
+  // No-op: persistent layout storage removed
+}
+function loadLayoutConfig(_key: string): ChartLayoutConfig | null {
+  // No-op: persistent layout storage removed
+  return null;
+}
+
 export function LayoutManager({
   storageKey,
   defaultLayout,
   isEditing,
   onSave,
   onCancel,
-  children
+  children,
 }: LayoutManagerProps) {
   // State for layout configuration
   const [layout, setLayout] = useState<ChartLayoutConfig>([]);
@@ -49,14 +60,16 @@ export function LayoutManager({
   // Handle save action
   const handleSave = () => {
     // Sort by position before saving
-    const sortedLayout = [...editingLayout].sort((a, b) => a.position - b.position);
-    
+    const sortedLayout = [...editingLayout].sort(
+      (a, b) => a.position - b.position
+    );
+
     // Save the layout
     saveLayoutConfig(storageKey, sortedLayout);
-    
+
     // Update the current layout
     setLayout(sortedLayout);
-    
+
     // Notify parent
     onSave();
   };
@@ -65,17 +78,17 @@ export function LayoutManager({
   const handleCancel = () => {
     // Reset to the saved layout
     setEditingLayout([...layout]);
-    
+
     // Notify parent
     onCancel();
   };
 
   // Handle chart width toggle
   const handleWidthToggle = (id: string) => {
-    setEditingLayout(prev => 
-      prev.map(item => 
-        item.id === id 
-          ? { ...item, width: item.width === 'half' ? 'full' : 'half' } 
+    setEditingLayout((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? { ...item, width: item.width === "half" ? "full" : "half" }
           : item
       )
     );
@@ -103,14 +116,14 @@ export function LayoutManager({
   // Handle drop
   const handleDrop = (e: React.DragEvent, targetId: string) => {
     e.preventDefault();
-    
+
     if (!isDragging || isDragging === targetId) {
       return;
     }
 
     // Find the positions of both items
-    const sourceItem = editingLayout.find(item => item.id === isDragging);
-    const targetItem = editingLayout.find(item => item.id === targetId);
+    const sourceItem = editingLayout.find((item) => item.id === isDragging);
+    const targetItem = editingLayout.find((item) => item.id === targetId);
 
     if (!sourceItem || !targetItem) {
       return;
@@ -121,8 +134,8 @@ export function LayoutManager({
     const targetPosition = targetItem.position;
 
     // Update the layout with new positions
-    setEditingLayout(prev => 
-      prev.map(item => {
+    setEditingLayout((prev) =>
+      prev.map((item) => {
         if (item.id === isDragging) {
           return { ...item, position: targetPosition };
         } else if (item.id === targetId) {
@@ -148,12 +161,13 @@ export function LayoutManager({
           .map((item, index) => (
             <div
               key={item.id}
-              className={`${item.width === 'full' ? 'md:col-span-2' : ''}`}
+              className={`${item.width === "full" ? "md:col-span-2" : ""}`}
               data-id={item.id}
             >
               {/* Find the corresponding child by id */}
               {React.Children.toArray(children).find(
-                (child) => React.isValidElement(child) && child.props.id === item.id
+                (child) =>
+                  React.isValidElement(child) && child.props.id === item.id
               )}
             </div>
           ))}
@@ -194,10 +208,14 @@ export function LayoutManager({
             <div
               key={item.id}
               className={`
-                relative 
-                ${item.width === 'full' ? 'md:col-span-2' : ''} 
-                ${isDragging === item.id ? 'opacity-50' : ''}
-                ${dragOverId === item.id ? 'border-2 border-blue-400 rounded-lg' : ''}
+                relative
+                ${item.width === "full" ? "md:col-span-2" : ""}
+                ${isDragging === item.id ? "opacity-50" : ""}
+                ${
+                  dragOverId === item.id
+                    ? "border-2 border-blue-400 rounded-lg"
+                    : ""
+                }
               `}
               draggable={true}
               onDragStart={() => handleDragStart(item.id)}
@@ -211,14 +229,17 @@ export function LayoutManager({
                   onClick={() => handleWidthToggle(item.id)}
                   className="p-2 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors text-xs"
                 >
-                  {item.width === 'half' ? 'Make Full Width' : 'Make Half Width'}
+                  {item.width === "half"
+                    ? "Make Full Width"
+                    : "Make Half Width"}
                 </button>
               </div>
-              
+
               <div className="p-2 border-2 border-dashed border-gray-300 rounded-lg cursor-move">
                 {/* Find the corresponding child by id */}
                 {React.Children.toArray(children).find(
-                  (child) => React.isValidElement(child) && child.props.id === item.id
+                  (child) =>
+                    React.isValidElement(child) && child.props.id === item.id
                 )}
               </div>
             </div>

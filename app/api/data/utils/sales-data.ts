@@ -278,15 +278,57 @@ export async function processSalesData(): Promise<SalesDataPoint[]> {
         return result;
       };
 
-      // Function to calculate number of modules sold per deal (distinct module types)
+      // Function to calculate number of modules sold per deal (explicit module list)
       const getTotalModules = (item: any) => {
-        // Get counts for each license type field
-        const licenseTypes = getLicenseTypes(item);
-        // Count each module type as one if seats > 0
-        const moduleCount = Object.values(licenseTypes).filter(
-          (count) => count > 0
-        ).length;
-        return moduleCount;
+        const parseCount = (raw: any) => {
+          if (typeof raw === "number") return raw;
+          if (typeof raw === "string") {
+            const cleaned = raw.replace(/[^0-9.]/g, "");
+            return parseFloat(cleaned) || 0;
+          }
+          return 0;
+        };
+        let count = 0;
+        // edays Absence (User + Leaver)
+        const ulCol = findColumn(item, ["User_licenses1__c"]);
+        const ultCol = findColumn(item, ["User_Licenses_Total__c"]);
+        const llCol = findColumn(item, ["Leavers_Licenses__c"]);
+        const userVal =
+          (ulCol && item[ulCol] != null ? parseCount(item[ulCol]) : 0) +
+          (ultCol && item[ultCol] != null ? parseCount(item[ultCol]) : 0);
+        const leaverVal =
+          llCol && item[llCol] != null ? parseCount(item[llCol]) : 0;
+        if (userVal + leaverVal > 0) count++;
+        // edays People Insights
+        const piCol = findColumn(item, ["People_Insights_Licenses__c"]);
+        if (piCol && parseCount(item[piCol]) > 0) count++;
+        // Core HR (Directory)
+        const dirCol = findColumn(item, ["Directory_Licenses__c"]);
+        if (dirCol && parseCount(item[dirCol]) > 0) count++;
+        // Time Submission
+        const subCol = findColumn(item, ["Time_Submission_Licenses__c"]);
+        if (subCol && parseCount(item[subCol]) > 0) count++;
+        // Time Tracking
+        const trackCol = findColumn(item, ["Time_Tracking_Licenses__c"]);
+        if (trackCol && parseCount(item[trackCol]) > 0) count++;
+        // third party EAP
+        const eapCol = findColumn(item, ["EAP_Licenses__c"]);
+        if (eapCol && parseCount(item[eapCol]) > 0) count++;
+        // Workflow Builder
+        const wfCol = findColumn(item, ["Workflow_Builder_Pro_Licenses__c"]);
+        if (wfCol && parseCount(item[wfCol]) > 0) count++;
+        // Grosvenor
+        const grosCol = findColumn(item, ["Grosvenor_Licenses__c"]);
+        if (grosCol && parseCount(item[grosCol]) > 0) count++;
+        // ELMO Core HR
+        const elmoCoreCol = findColumn(item, ["ELMO_Core_HR_Licenses__c"]);
+        if (elmoCoreCol && parseCount(item[elmoCoreCol]) > 0) count++;
+        // ELMO Onboarding
+        const elmoOnboardCol = findColumn(item, [
+          "ELMO_Onboarding_Licenses__c",
+        ]);
+        if (elmoOnboardCol && parseCount(item[elmoOnboardCol]) > 0) count++;
+        return count;
       };
 
       // Initialize counters for different sales categories
