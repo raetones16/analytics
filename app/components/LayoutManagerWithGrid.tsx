@@ -10,12 +10,27 @@ export type ChartLayoutItem = {
 
 export type ChartLayoutConfig = ChartLayoutItem[];
 
-function saveLayoutConfig(_key: string, _layout: ChartLayoutConfig) {
-  // No-op: persistent layout storage removed
+function saveLayoutConfig(key: string, layout: ChartLayoutConfig) {
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem(key, JSON.stringify(layout));
+    } catch (e) {
+      // Handle storage errors if needed
+    }
+  }
 }
 
-function loadLayoutConfig(_key: string): ChartLayoutConfig | null {
-  // No-op: persistent layout storage removed
+function loadLayoutConfig(key: string): ChartLayoutConfig | null {
+  if (typeof window !== "undefined") {
+    try {
+      const stored = localStorage.getItem(key);
+      if (stored) {
+        return JSON.parse(stored);
+      }
+    } catch (e) {
+      // Handle parse errors if needed
+    }
+  }
   return null;
 }
 
