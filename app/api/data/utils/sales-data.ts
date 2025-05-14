@@ -101,19 +101,34 @@ export async function processSalesData(): Promise<SalesDataPoint[]> {
       // Group by month, using the Channel__c field for categorization
       const dataByMonth = new Map();
 
-      // Function to categorize sales based on Channel__c field
+      // Function to categorize sales based on Channel__c and Type fields
       const getSalesCategory = (item: any) => {
-        if (!channelColumn || !item[channelColumn]) {
+        if (
+          !channelColumn ||
+          !item[channelColumn] ||
+          !typeColumn ||
+          !item[typeColumn]
+        ) {
           return "unknown";
         }
 
         const channelValue = String(item[channelColumn]).trim();
+        const typeValue = String(item[typeColumn]).trim();
 
-        // Categories based on Channel__c value
-        if (channelValue === "Direct Sale") {
+        // Revised logic: require both Channel__c and Type to match for new categories
+        if (channelValue === "Direct Sale" && typeValue === "New prospect") {
           return "new-direct";
-        } else if (channelValue === "Partner Sale (Partner)") {
+        } else if (
+          channelValue === "Partner Sale (Partner)" &&
+          typeValue === "Partner Program Opportunity"
+        ) {
           return "new-partner";
+        } else if (channelValue === "Direct Sale") {
+          // Direct Sale but not new prospect = existing client
+          return "existing-client";
+        } else if (channelValue === "Partner Sale (Partner)") {
+          // Partner Sale but not new partner program = existing partner
+          return "existing-partner";
         } else if (channelValue === "Customer Sale") {
           return "existing-client";
         } else if (channelValue === "Customer Sale (Partner)") {
@@ -589,7 +604,7 @@ export async function processSalesData(): Promise<SalesDataPoint[]> {
             averageOrderValue: totalCount > 0 ? totalValue / totalCount : 0,
             averageModulesPerClient:
               modulesCountNewDeals > 0
-                ? totalModulesNewDeals / modulesCountNewDeals + 1
+                ? totalModulesNewDeals / modulesCountNewDeals
                 : 0,
             avgRevenuePerAccount,
             arrGrowth,

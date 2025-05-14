@@ -2,27 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { DateFilter } from "./components/DateFilter";
-import { ProductCharts } from "./components/ProductCharts";
 import { SalesCharts } from "./components/SalesCharts";
 import { processChartData } from "./utils/date-utils";
 import { uiColors } from "./utils/theme";
 
 // Define types for our data
-interface ProductUsageData {
-  date: string;
-  webLogins: number;
-  mobileLogins: number;
-  webAbsencesBooked: number;
-  mobileAbsencesBooked: number;
-  webTimesheetsSubmitted: number;
-  mobileTimesheetsSubmitted: number;
-  workflowsCreated: number;
-  _synthetic?: {
-    distribution?: boolean;
-    data?: boolean;
-  };
-}
-
 interface SalesData {
   date: string;
   averageOrderValue: number;
@@ -92,39 +76,6 @@ function filterDataByDateRange<T extends { date: string }>(
 type DateRangeType = "month" | "quarter" | "half-year" | "year";
 
 // Mock data for fallback
-const mockProductData: ProductUsageData[] = [
-  {
-    date: "2025-01-01",
-    webLogins: 1250,
-    mobileLogins: 850,
-    webAbsencesBooked: 320,
-    mobileAbsencesBooked: 180,
-    webTimesheetsSubmitted: 920,
-    mobileTimesheetsSubmitted: 580,
-    workflowsCreated: 42,
-  },
-  {
-    date: "2025-02-01",
-    webLogins: 1330,
-    mobileLogins: 910,
-    webAbsencesBooked: 345,
-    mobileAbsencesBooked: 205,
-    webTimesheetsSubmitted: 965,
-    mobileTimesheetsSubmitted: 620,
-    workflowsCreated: 49,
-  },
-  {
-    date: "2025-03-01",
-    webLogins: 1480,
-    mobileLogins: 1050,
-    webAbsencesBooked: 410,
-    mobileAbsencesBooked: 240,
-    webTimesheetsSubmitted: 1090,
-    mobileTimesheetsSubmitted: 730,
-    workflowsCreated: 64,
-  },
-];
-
 const mockSalesData: SalesData[] = [
   {
     date: "2025-01-01",
@@ -148,7 +99,6 @@ const mockSalesData: SalesData[] = [
 
 export default function Dashboard() {
   const [dateRange, setDateRange] = useState<DateRangeType>("quarter");
-  const [productData, setProductData] = useState<ProductUsageData[]>([]);
   const [salesData, setSalesData] = useState<SalesData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -167,36 +117,23 @@ export default function Dashboard() {
         if (response.ok) {
           const data = await response.json();
           // Add detailed console logging for data
-          console.log(
-            `Data from API - Product: ${
-              data.productData?.length || 0
-            }, Sales: ${data.salesData?.length || 0}`
-          );
+          console.log(`Data from API - Sales: ${data.salesData?.length || 0}`);
 
           // Check if we received data for each category
-          const hasProductData =
-            data.productData &&
-            Array.isArray(data.productData) &&
-            data.productData.length > 0;
           const hasSalesData =
             data.salesData &&
             Array.isArray(data.salesData) &&
             data.salesData.length > 0;
 
-          console.log(
-            `Data availability - Product: ${hasProductData}, Sales: ${hasSalesData}`
-          );
+          console.log(`Data availability - Sales: ${hasSalesData}`);
 
           // Use fetched data if available, otherwise fall back to mock data
-          const productDataSource = hasProductData
-            ? data.productData
-            : mockProductData;
           const salesDataSource = hasSalesData ? data.salesData : mockSalesData;
 
           // Set data source flag based on whether we're using real or mock data
-          setDataSource(hasProductData && hasSalesData ? "api" : "mock");
+          setDataSource(hasSalesData ? "api" : "mock");
 
-          if (!hasProductData || !hasSalesData) {
+          if (!hasSalesData) {
             setError(
               "Some data could not be loaded from the API. Using fallback data where needed."
             );
@@ -204,28 +141,20 @@ export default function Dashboard() {
 
           // Filter by date range
           console.log("Filtering data by date range:", dateRange);
-          const filteredProductData = filterDataByDateRange(
-            productDataSource,
-            dateRange
-          );
           const filteredSalesData = filterDataByDateRange(
             salesDataSource,
             dateRange
           );
 
           console.log(
-            `Filtered data counts - Product: ${filteredProductData.length}, Sales: ${filteredSalesData.length}`
+            `Filtered data counts - Sales: ${filteredSalesData.length}`
           );
 
           // Process data with consistent date formatting and ordering
-          const processedProductData = processChartData(
-            filteredProductData as ProductUsageData[]
-          );
           const processedSalesData = processChartData(
             filteredSalesData as SalesData[]
           );
 
-          setProductData(processedProductData);
           setSalesData(processedSalesData);
         } else {
           // If API fails, use mock data
@@ -235,24 +164,16 @@ export default function Dashboard() {
           setDataSource("mock");
 
           // Filter and process mock data
-          const filteredProductData = filterDataByDateRange(
-            mockProductData,
-            dateRange
-          );
           const filteredSalesData = filterDataByDateRange(
             mockSalesData,
             dateRange
           );
 
           // Process data with consistent date formatting and ordering
-          const processedProductData = processChartData(
-            filteredProductData as ProductUsageData[]
-          );
           const processedSalesData = processChartData(
             filteredSalesData as SalesData[]
           );
 
-          setProductData(processedProductData);
           setSalesData(processedSalesData);
         }
       } catch (error) {
@@ -265,24 +186,16 @@ export default function Dashboard() {
         setDataSource("mock");
 
         // Filter and process mock data
-        const filteredProductData = filterDataByDateRange(
-          mockProductData,
-          dateRange
-        );
         const filteredSalesData = filterDataByDateRange(
           mockSalesData,
           dateRange
         );
 
         // Process data with consistent date formatting and ordering
-        const processedProductData = processChartData(
-          filteredProductData as ProductUsageData[]
-        );
         const processedSalesData = processChartData(
           filteredSalesData as SalesData[]
         );
 
-        setProductData(processedProductData);
         setSalesData(processedSalesData);
       } finally {
         setIsLoading(false);
@@ -341,9 +254,6 @@ export default function Dashboard() {
         </div>
       ) : (
         <>
-          <div className="mb-12">
-            <ProductCharts data={productData} />
-          </div>
           <div className="mb-12">
             <SalesCharts data={salesData} />
           </div>

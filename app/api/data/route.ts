@@ -1,12 +1,6 @@
 import { NextResponse } from "next/server";
 import { promises as fs } from "fs";
-import {
-  BASE_DATA_DIR,
-  LOG_LEVEL,
-  log,
-  processProductData,
-  processSalesData,
-} from "./utils";
+import { BASE_DATA_DIR, LOG_LEVEL, log, processSalesData } from "./utils";
 
 // We need to export a config to tell Next.js this route is dynamic
 export const dynamic = "force-dynamic";
@@ -36,14 +30,6 @@ export async function GET(request: Request) {
     log(LOG_LEVEL.INFO, `Request type: ${type}`);
 
     switch (type) {
-      case "product":
-        const productData = await processProductData();
-        log(
-          LOG_LEVEL.INFO,
-          `Returning ${productData.length} product data points`
-        );
-        return NextResponse.json(productData);
-
       case "sales":
         const salesData = await processSalesData();
         log(LOG_LEVEL.INFO, `Returning ${salesData.length} sales data points`);
@@ -51,16 +37,9 @@ export async function GET(request: Request) {
 
       case "all":
         log(LOG_LEVEL.INFO, "Processing all data types...");
-        const [allProductData, allSalesData] = await Promise.all([
-          processProductData(),
-          processSalesData(),
-        ]);
-        log(
-          LOG_LEVEL.INFO,
-          `Results - Product: ${allProductData.length} points, Sales: ${allSalesData.length} points`
-        );
+        const allSalesData = await processSalesData();
+        log(LOG_LEVEL.INFO, `Results - Sales: ${allSalesData.length} points`);
         return NextResponse.json({
-          productData: allProductData,
           salesData: allSalesData,
         });
 
