@@ -16,6 +16,7 @@ import {
 import { VisualizationToggle } from "./VisualizationToggle";
 import { LayoutManagerWithGrid } from "./LayoutManagerWithGrid";
 import { EditLayoutButton } from "./EditLayoutButton";
+import { formatCurrency } from "./charts/sales/types";
 
 interface SalesChartsProps {
   data: SalesData[];
@@ -37,6 +38,34 @@ const getDefaultSalesChartsLayout = (): {
   { id: "averageModulesSold", position: 6, width: "half" },
   { id: "averageModulesAllClients", position: 7, width: "half" },
 ];
+
+// Simple stat card component with optional tooltip
+function StatCard({
+  label,
+  value,
+  tooltip,
+}: {
+  label: string;
+  value: string | number;
+  tooltip?: string;
+}) {
+  return (
+    <div className="flex flex-col items-center bg-white rounded-lg shadow p-4 min-w-[140px] relative">
+      <span className="text-xs text-gray-500 mb-1 flex items-center gap-1">
+        {label}
+        {tooltip && (
+          <span className="relative group cursor-pointer">
+            <span className="text-blue-400 ml-1">ℹ️</span>
+            <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-10 hidden group-hover:block group-focus:block bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-pre w-max min-w-[180px] max-w-[320px] shadow-lg pointer-events-auto">
+              {tooltip}
+            </span>
+          </span>
+        )}
+      </span>
+      <span className="text-xl font-bold text-gray-900">{value}</span>
+    </div>
+  );
+}
 
 export function SalesCharts({ data }: SalesChartsProps) {
   // State for hover over charts
@@ -137,6 +166,42 @@ export function SalesCharts({ data }: SalesChartsProps) {
       .catch(() => setAllClientsData([]));
   }, []);
 
+  // Add state for summary stats
+  const [summaryStats, setSummaryStats] = useState<{
+    totalSalesValue: number;
+    averageOrderValue: number;
+    averageModulesPerClient: number;
+    newClients: number;
+    totalClients: number;
+    files?: Record<string, string | string[]>;
+  } | null>(null);
+  const [summaryFiles, setSummaryFiles] = useState<Record<
+    string,
+    string | string[]
+  > | null>(null);
+
+  useEffect(() => {
+    if (!data || data.length === 0) return;
+    const dates = data
+      .map((d) => new Date(d.date))
+      .filter((d) => !isNaN(d.getTime()));
+    if (dates.length === 0) return;
+    const minDate = new Date(Math.min(...dates.map((d) => d.getTime())));
+    const maxDate = new Date(Math.max(...dates.map((d) => d.getTime())));
+    const start = minDate.toISOString().slice(0, 10);
+    const end = maxDate.toISOString().slice(0, 10);
+    fetch(`/api/data?type=summary&start=${start}&end=${end}`)
+      .then((res) => res.json())
+      .then((json) => {
+        setSummaryStats(json);
+        setSummaryFiles(json.files || null);
+      })
+      .catch(() => {
+        setSummaryStats(null);
+        setSummaryFiles(null);
+      });
+  }, [data]);
+
   // If we have no data, show a message
   if (!data || data.length === 0) {
     return (
@@ -196,6 +261,95 @@ export function SalesCharts({ data }: SalesChartsProps) {
         details="Data is categorized by Channel__c field"
         type="full"
       />
+
+      {/* Stat cards row */}
+      <div className="flex w-full gap-4 flex-wrap mb-6">
+        <div className="flex-1 min-w-[140px]">
+          <StatCard
+            label="Total Sales Value"
+            value={
+              summaryStats ? formatCurrency(summaryStats.totalSalesValue) : "-"
+            }
+            tooltip={
+              summaryFiles?.totalSalesValue
+                ? `Source: ${
+                    Array.isArray(summaryFiles.totalSalesValue)
+                      ? summaryFiles.totalSalesValue.join(", ")
+                      : summaryFiles.totalSalesValue
+                  }`
+                : undefined
+            }
+          />
+        </div>
+        <div className="flex-1 min-w-[140px]">
+          <StatCard
+            label="Average Order Value"
+            value={
+              summaryStats
+                ? formatCurrency(summaryStats.averageOrderValue)
+                : "-"
+            }
+            tooltip={
+              summaryFiles?.averageOrderValue
+                ? `Source: ${
+                    Array.isArray(summaryFiles.averageOrderValue)
+                      ? summaryFiles.averageOrderValue.join(", ")
+                      : summaryFiles.averageOrderValue
+                  }`
+                : undefined
+            }
+          />
+        </div>
+        <div className="flex-1 min-w-[140px]">
+          <StatCard
+            label="Avg Modules per Client"
+            value={
+              summaryStats
+                ? summaryStats.averageModulesPerClient?.toFixed(2)
+                : "-"
+            }
+            tooltip={
+              summaryFiles?.averageModulesPerClient
+                ? `Source: ${
+                    Array.isArray(summaryFiles.averageModulesPerClient)
+                      ? summaryFiles.averageModulesPerClient.join(", ")
+                      : summaryFiles.averageModulesPerClient
+                  }`
+                : undefined
+            }
+          />
+        </div>
+        <div className="flex-1 min-w-[140px]">
+          <StatCard
+            label="New Clients"
+            value={summaryStats ? summaryStats.newClients : "-"}
+            tooltip={
+              summaryFiles?.newClients
+                ? `Source: ${
+                    Array.isArray(summaryFiles.newClients)
+                      ? summaryFiles.newClients.join(", ")
+                      : summaryFiles.newClients
+                  }`
+                : undefined
+            }
+          />
+        </div>
+        <div className="flex-1 min-w-[140px]">
+          <StatCard
+            label="Total Clients"
+            value={summaryStats ? summaryStats.totalClients : "-"}
+            tooltip={
+              summaryFiles?.totalClients
+                ? `Source: ${
+                    Array.isArray(summaryFiles.totalClients)
+                      ? summaryFiles.totalClients.join(", ")
+                      : summaryFiles.totalClients
+                  }`
+                : undefined
+            }
+          />
+        </div>
+      </div>
 
       <LayoutManagerWithGrid
         storageKey={SALES_CHARTS_LAYOUT_KEY}

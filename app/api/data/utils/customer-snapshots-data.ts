@@ -1,7 +1,7 @@
 import { promises as fs } from "fs";
 import path from "path";
 import { LOG_LEVEL, log } from "./logging";
-import { DATA_DIRS, findColumn, readCSVFile } from "./file-utils";
+import { DATA_DIRS, findColumn, readCSVFile, parseDate } from "./file-utils";
 
 // Utility to extract date from filename (e.g., '2025-05 Customer Snapshot.csv' -> '2025-05-01')
 function extractDateFromFilename(filename: string): string | null {
@@ -132,4 +132,61 @@ export async function processCustomerSnapshots(): Promise<
     );
     return [];
   }
+}
+
+// Exported summary function for snapshot stats for a period
+export async function getSnapshotSummaryForPeriod(
+  startDate: Date,
+  endDate: Date
+): Promise<{
+  averageModulesPerClient: number;
+  totalClients: number;
+  file?: string;
+}> {
+  const files = await fs.readdir(DATA_DIRS.sales);
+  const snapshotFiles = files.filter((f) =>
+    f.match(/\d{4}-\d{2} Customer Snapshot\.csv$/)
+  );
+  // Find the latest snapshot file within the period
+  let latestSnapshot: { file: string; date: Date | null } | null = null;
+  for (const file of snapshotFiles) {
+    const dateStr = extractDateFromFilename(file);
+    const date = dateStr ? parseDate(dateStr) : null;
+    if (date && date >= startDate && date <= endDate) {
+      if (
+        !latestSnapshot ||
+        (latestSnapshot.date && date > latestSnapshot.date)
+      ) {
+        latestSnapshot = { file, date };
+      }
+    }
+  }
+  if (!latestSnapshot) {
+    return { averageModulesPerClient: 0, totalClients: 0, file: undefined };
+  }
+  const { data } = await readCSVFile(
+    path.join(DATA_DIRS.sales, latestSnapshot.file)
+  );
+  if (!data || data.length === 0) {
+    return {
+      averageModulesPerClient: 0,
+      totalClients: 0,
+      file: latestSnapshot.file,
+    };
+  }
+  let totalModules = 0;
+  let clientCount = 0;
+  for (const row of data) {
+    if (!row || typeof row !== "object") continue;
+    const modules = getTotalModulesForSnapshot(row);
+    totalModules += modules;
+    clientCount++;
+  }
+  const averageModulesPerClient =
+    clientCount > 0 ? Math.round((totalModules / clientCount) * 100) / 100 : 0;
+  return {
+    averageModulesPerClient,
+    totalClients: clientCount,
+    file: latestSnapshot.file,
+  };
 }
