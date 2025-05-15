@@ -57,6 +57,12 @@ function getTotalModulesForSnapshot(item: any): number {
   // ELMO Onboarding
   const elmoOnboardCol = findColumn(item, ["ELMO Onboarding License"]);
   if (elmoOnboardCol && parseCount(item[elmoOnboardCol]) > 0) count++;
+  // ELMO Performance
+  const elmoPerformanceCol = findColumn(item, ["ELMO Performance License"]);
+  if (elmoPerformanceCol && parseCount(item[elmoPerformanceCol]) > 0) count++;
+  // ELMO Learning
+  const elmoLearningCol = findColumn(item, ["ELMO Learning License"]);
+  if (elmoLearningCol && parseCount(item[elmoLearningCol]) > 0) count++;
   return count;
 }
 

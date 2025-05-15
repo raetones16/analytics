@@ -358,6 +358,15 @@ export async function processSalesData(): Promise<SalesDataPoint[]> {
       // ELMO Onboarding
       const elmoOnboardCol = findColumn(item, ["ELMO_Onboarding_Licenses__c"]);
       if (elmoOnboardCol && parseCount(item[elmoOnboardCol]) > 0) count++;
+      // ELMO Performance
+      const elmoPerformanceCol = findColumn(item, [
+        "ELMO_Performance_License__c",
+      ]);
+      if (elmoPerformanceCol && parseCount(item[elmoPerformanceCol]) > 0)
+        count++;
+      // ELMO Learning
+      const elmoLearningCol = findColumn(item, ["ELMO_Learning_License__c"]);
+      if (elmoLearningCol && parseCount(item[elmoLearningCol]) > 0) count++;
       return count;
     };
 
