@@ -68,11 +68,11 @@ export async function GET(request: Request) {
         const snapshotSummary = await getSnapshotSummaryForPeriod(start, end);
         // Collect file names for tooltips
         const files: Record<string, string | string[]> = {
-          totalSalesValue: salesSummary.file || null,
-          averageOrderValue: salesSummary.file || null,
-          newClients: salesSummary.file || null,
-          averageModulesPerClient: snapshotSummary.file || null,
-          totalClients: snapshotSummary.file || null,
+          totalSalesValue: salesSummary.file || "",
+          averageOrderValue: salesSummary.file || "",
+          newClients: salesSummary.file || "",
+          averageModulesPerClient: snapshotSummary.file || "",
+          totalClients: snapshotSummary.file || "",
         };
         return NextResponse.json({
           totalSalesValue: salesSummary.totalSalesValue,

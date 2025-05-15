@@ -726,25 +726,27 @@ export async function getSalesSummaryForPeriod(
     return date && isWithinPeriod(date, startDate, endDate);
   });
 
-  // Total sales value
-  const totalSalesValue = filteredSales.reduce((sum, item) => {
+  // Only include new-direct and new-partner deals
+  const newDeals = filteredSales.filter((item) => {
+    if (!typeColumn) return false;
+    const type = String(item[typeColumn] || "").trim();
+    return type === "New prospect" || type === "Partner Program Opportunity";
+  });
+
+  // Total sales value for new deals
+  const totalSalesValue = newDeals.reduce((sum, item) => {
     const val = parseFloat(item[amountColumn]) || 0;
     return sum + val;
   }, 0);
 
-  // Average order value
-  const salesCount = filteredSales.length;
+  // Average order value for new deals
+  const salesCount = newDeals.length;
   const averageOrderValue = salesCount > 0 ? totalSalesValue / salesCount : 0;
 
-  // New clients: count unique Account IDs where type is 'New' or similar
-  const newClientDeals = filteredSales.filter((item) => {
-    if (!typeColumn) return false;
-    const type = String(item[typeColumn] || "").toLowerCase();
-    return type.includes("new");
-  });
+  // New clients: count unique Account IDs among new deals
   const uniqueNewClients = new Set(
     accountIdColumn
-      ? newClientDeals.map((item) => item[accountIdColumn]).filter(Boolean)
+      ? newDeals.map((item) => item[accountIdColumn]).filter(Boolean)
       : []
   );
 

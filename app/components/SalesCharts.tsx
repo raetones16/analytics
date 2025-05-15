@@ -283,7 +283,7 @@ export function SalesCharts({ data }: SalesChartsProps) {
         </div>
         <div className="flex-1 min-w-[140px]">
           <StatCard
-            label="Average Order Value"
+            label="Average Order Value (New Deals)"
             value={
               summaryStats
                 ? formatCurrency(summaryStats.averageOrderValue)
