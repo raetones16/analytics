@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the plan for integrating external data sources into the Analytics Dashboard using Meltano and the Singer ecosystem, starting with Salesforce as the first connector. It is intended as a living document to guide implementation, capture decisions, and support ongoing collaboration.
+This document outlines the plan and progress for integrating external data sources into the Analytics Dashboard using Meltano and the Singer ecosystem, starting with Salesforce as the first connector. It is a living document to guide implementation, capture decisions, and support ongoing collaboration.
 
 ---
 
@@ -22,8 +22,77 @@ This document outlines the plan for integrating external data sources into the A
 - **Connectors:** Leverage existing Singer taps (starting with `tap-salesforce`).
 - **Frontend:** Next.js (React, TypeScript), Tailwind CSS, Radix UI for modals/forms.
 - **Backend:** API endpoints to securely store and validate connector configs, interface with Meltano CLI.
-- **Config Storage:** Store connector configs securely (encrypted at rest, never exposed to frontend after entry).
+- **Config Storage:** Store connector configs securely in Supabase (encrypted at rest, never exposed to frontend after entry).
 - **Extensibility:** Design for easy addition of new connectors and marketplace-style discovery.
+
+---
+
+## Backend API Implementation (Completed)
+
+### **Supabase Table**
+
+- Table: `integrations`
+- Fields: `id`, `type`, `name`, `config`, `secrets`, `status`, `created_at`, `updated_at`
+
+### **API Endpoints**
+
+All endpoints are available under `/api/integrations`.
+
+#### **Create Integration**
+
+- **POST `/api/integrations`**
+- Create a new integration (e.g., Salesforce)
+- **Body:**
+  ```json
+  {
+    "type": "salesforce",
+    "name": "My Salesforce Connector",
+    "config": { "instance_url": "...", "start_date": "..." },
+    "secrets": {
+      "client_id": "...",
+      "client_secret": "...",
+      "refresh_token": "..."
+    }
+  }
+  ```
+- **Response:** Created integration object
+
+#### **List Integrations**
+
+- **GET `/api/integrations`**
+- Returns all integrations
+- **Response:** `{ "integrations": [ ... ] }`
+
+#### **Get Integration by ID**
+
+- **GET `/api/integrations/[id]`**
+- Returns a single integration
+- **Response:** `{ "integration": { ... } }`
+
+#### **Update Integration**
+
+- **PUT `/api/integrations/[id]`**
+- Update an integration
+- **Body:** Same as create
+- **Response:** Updated integration object
+
+#### **Delete Integration**
+
+- **DELETE `/api/integrations/[id]`**
+- Deletes an integration
+- **Response:** `{ "success": true }`
+
+#### **Test Connection**
+
+- **POST `/api/integrations/[id]/test`**
+- Tests the connection (currently a stub, will call Meltano CLI in future)
+- **Response:** `{ "success": true, "message": "Test connection stub: always succeeds." }`
+
+#### **Trigger Sync**
+
+- **POST `/api/integrations/[id]/sync`**
+- Triggers a sync (currently a stub, will call Meltano CLI in future)
+- **Response:** `{ "success": true, "message": "Sync triggered (stub)." }`
 
 ---
 
@@ -38,52 +107,51 @@ This document outlines the plan for integrating external data sources into the A
 
 ---
 
-## Implementation Steps
+## Implementation Steps & Status
 
 1. **Documentation & Planning**
 
-   - Create and maintain this documentation folder for all integration-related work.
+   - [x] Create and maintain this documentation folder for all integration-related work.
 
-2. **Frontend**
+2. **Backend**
 
-   - Add "Integrations" or "Marketplace" section/page.
-   - Implement "Add Integration" button (opens Radix Dialog wizard).
-   - Step 1: Select connector (Salesforce for MVP).
-   - Step 2: Show config form (Client ID, Secret, Refresh Token, Instance URL, Start Date, etc.).
-   - Step 3: Test connection (calls backend API).
-   - Step 4: Review & Save.
-   - Show installed integrations with status/logs/actions.
+   - [x] Supabase table for integrations
+   - [x] API endpoints for CRUD, test, and sync actions
+   - [x] Secure secrets management (Supabase, never exposed to frontend)
+   - [x] All endpoints tested and working
 
-3. **Backend**
+3. **Frontend**
 
-   - API endpoints for storing, retrieving, and validating connector configs.
-   - Secure secrets management (encrypted storage, never exposed to frontend).
-   - Interface with Meltano CLI to add/configure/test connectors.
+   - [ ] Add "Integrations" or "Marketplace" section/page
+   - [ ] Display list of integrations (GET endpoint)
+   - [ ] Add "Add Integration" wizard/modal (POST endpoint)
+   - [ ] Enable edit, delete, test, and sync actions from the UI
 
 4. **Meltano Integration**
 
-   - Add and configure `tap-salesforce` in `meltano.yml`.
-   - Implement logic to run/test syncs and surface results/logs in the UI.
-   - Plan for adding more connectors (marketplace, dynamic config forms).
+   - [ ] Implement real logic for test and sync endpoints (call Meltano CLI)
+   - [ ] Sync integration config with `meltano.yml`
+   - [ ] Surface sync/test results and logs
 
 5. **Notifications & Error Handling**
 
-   - Notification system for sync failures, misconfigurations, and required actions.
-   - Actionable alerts with deep links to fix issues.
+   - [ ] Notification system for sync failures, misconfigurations, and required actions
+   - [ ] Actionable alerts with deep links to fix issues
 
 6. **Extensibility**
-   - Schema-driven form generation for new connectors.
-   - Connector metadata (name, logo, category, description) for marketplace.
-   - Bulk actions and scheduling support.
+   - [ ] Schema-driven form generation for new connectors
+   - [ ] Connector metadata (name, logo, category, description) for marketplace
+   - [ ] Bulk actions and scheduling support
 
 ---
 
-## Open Questions & Decisions
+## Open Questions & Decisions (Updated)
 
-- **Secrets Management:** Use encrypted DB fields for MVP, consider managed secrets service for production.
+- **Secrets Management:** Using Supabase for secure storage; consider managed secrets service for production if needed.
 - **User Permissions:** No permissions for MVP; design with future admin-only access in mind.
 - **Connector Marketplace:** Start with Salesforce, but design for easy addition and discovery of more connectors.
 - **Notifications:** Use notification bars/toasts with clear, actionable messages.
+- **Meltano CLI Integration:** Next major backend step is to connect test/sync endpoints to Meltano CLI.
 
 ---
 
@@ -91,6 +159,7 @@ This document outlines the plan for integrating external data sources into the A
 
 - [Meltano Documentation](https://docs.meltano.com/)
 - [Singer SDK](https://sdk.meltano.com/)
+- [Supabase](https://supabase.com/)
 - [Radix UI](https://www.radix-ui.com/)
 - [Tailwind CSS](https://tailwindcss.com/)
 
