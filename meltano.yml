@@ -1,0 +1,16 @@
+version: 1
+default_environment: dev
+project_id: 721350f9-ff5f-407b-8896-e582bca49146
+environments:
+- name: dev
+- name: staging
+- name: prod
+plugins:
+  extractors:
+  - name: tap-salesforce
+    variant: meltanolabs
+    pip_url: git+https://github.com/MeltanoLabs/tap-salesforce.git@v1.9.0
+  loaders:
+  - name: target-jsonl
+    variant: andyh1203
+    pip_url: target-jsonl
