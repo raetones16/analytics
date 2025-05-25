@@ -1,0 +1,20 @@
+2025-05-25T19:35:36.176583Z [info     ] Using systemdb state backend
+2025-05-25T19:35:36.178782Z [warning  ] No state was found, complete import.
+2025-05-25T19:35:36.405752Z [error    ] Cannot start plugin tap-salesforce: Catalog discovery failed: command ['/Users/tim.prudames/analytics/.meltano/extractors/tap-salesforce/venv/bin/tap-salesforce', '--config', '/Users/tim.prudames/analytics/.meltano/run/tap-salesforce/tap.62189f6a-b080-47b9-b412-d39507b8861e.config.json', '--discover'] returned 1 with stderr:
+ /Users/tim.prudames/analytics/.meltano/extractors/tap-salesforce/venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+CRITICAL Cannot create credentials from config.
+Traceback (most recent call last):
+  File "/Users/tim.prudames/analytics/.meltano/extractors/tap-salesforce/venv/bin/tap-salesforce", line 8, in <module>
+    sys.exit(main())
+  File "/Users/tim.prudames/analytics/.meltano/extractors/tap-salesforce/venv/lib/python3.9/site-packages/tap_salesforce/__init__.py", line 557, in main
+    raise e
+  File "/Users/tim.prudames/analytics/.meltano/extractors/tap-salesforce/venv/lib/python3.9/site-packages/tap_salesforce/__init__.py", line 548, in main
+    main_impl()
+  File "/Users/tim.prudames/analytics/.meltano/extractors/tap-salesforce/venv/lib/python3.9/site-packages/tap_salesforce/__init__.py", line 510, in main_impl
+    credentials = parse_credentials(CONFIG)
+  File "/Users/tim.prudames/analytics/.meltano/extractors/tap-salesforce/venv/lib/python3.9/site-packages/tap_salesforce/salesforce/credentials.py", line 22, in parse_credentials
+    raise Exception("Cannot create credentials from config.")
+Exception: Cannot create credentials from config.
+
+2025-05-25T19:35:36.405902Z [error    ] Block run completed.           block_type=ExtractLoadBlocks err=RunnerError('Cannot start plugin tap-salesforce: Catalog discovery failed: command [\'/Users/tim.prudames/analytics/.meltano/extractors/tap-salesforce/venv/bin/tap-salesforce\', \'--config\', \'/Users/tim.prudames/analytics/.meltano/run/tap-salesforce/tap.62189f6a-b080-47b9-b412-d39507b8861e.config.json\', \'--discover\'] returned 1 with stderr:\n /Users/tim.prudames/analytics/.meltano/extractors/tap-salesforce/venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the \'ssl\' module is compiled with \'LibreSSL 2.8.3\'. See: https://github.com/urllib3/urllib3/issues/3020\n  warnings.warn(\nCRITICAL Cannot create credentials from config.\nTraceback (most recent call last):\n  File "/Users/tim.prudames/analytics/.meltano/extractors/tap-salesforce/venv/bin/tap-salesforce", line 8, in <module>\n    sys.exit(main())\n  File "/Users/tim.prudames/analytics/.meltano/extractors/tap-salesforce/venv/lib/python3.9/site-packages/tap_salesforce/__init__.py", line 557, in main\n    raise e\n  File "/Users/tim.prudames/analytics/.meltano/extractors/tap-salesforce/venv/lib/python3.9/site-packages/tap_salesforce/__init__.py", line 548, in main\n    main_impl()\n  File "/Users/tim.prudames/analytics/.meltano/extractors/tap-salesforce/venv/lib/python3.9/site-packages/tap_salesforce/__init__.py", line 510, in main_impl\n    credentials = parse_credentials(CONFIG)\n  File "/Users/tim.prudames/analytics/.meltano/extractors/tap-salesforce/venv/lib/python3.9/site-packages/tap_salesforce/salesforce/credentials.py", line 22, in parse_credentials\n    raise Exception("Cannot create credentials from config.")\nException: Cannot create credentials from config.\n') exit_codes={} set_number=0 success=False

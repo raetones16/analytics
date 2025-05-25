@@ -1,0 +1,5 @@
+2025-05-25T19:40:02.319383Z [warning  ] Force option is enabled, ignoring stale job check.
+2025-05-25T19:40:02.413314Z [info     ] Using systemdb state backend
+2025-05-25T19:40:02.414149Z [warning  ] No state was found, complete import.
+2025-05-25T19:42:11.067675Z [error    ] Cannot start plugin tap-salesforce: [Errno 2] No such file or directory: '/Users/tim.prudames/analytics/.meltano/run/tap-salesforce/tap.properties.json'
+2025-05-25T19:42:11.067929Z [error    ] Block run completed.           block_type=ExtractLoadBlocks err=RunnerError("Cannot start plugin tap-salesforce: [Errno 2] No such file or directory: '/Users/tim.prudames/analytics/.meltano/run/tap-salesforce/tap.properties.json'") exit_codes={} set_number=0 success=False

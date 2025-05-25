@@ -2,15 +2,29 @@ version: 1
 default_environment: dev
 project_id: 721350f9-ff5f-407b-8896-e582bca49146
 environments:
-- name: dev
-- name: staging
-- name: prod
+  - name: dev
+  - name: staging
+  - name: prod
 plugins:
   extractors:
-  - name: tap-salesforce
-    variant: meltanolabs
-    pip_url: git+https://github.com/MeltanoLabs/tap-salesforce.git@v1.9.0
+    - name: tap-salesforce
+      variant: meltanolabs
+      pip_url: git+https://github.com/MeltanoLabs/tap-salesforce.git@v1.9.0
+      config:
+        api_type: REST
+        start_date: '2025-05-25'
+        instance_url: https://orgfarm-b529f752a8-dev-ed.develop.my.salesforce.com
+        select_fields_by_default: true
+        client_id: >-
+          3MVG9rZjd7MXFdLhJijJhmfE.82RDoHJG6OPSnpO0ElwZWIyGjhYb1IiVDTTvejunH61ZP.HKpMo6.NnGQWws
+        client_secret: 6E4BC5A69B12A710FD4DABE28DCF4D3DA92A871D28D3C8E33F1BA1885480182A
+        refresh_token: >-
+          5Aep8612EC5NxGKVYqSiuQbR7fu_T39AMcg2fpEiLpYVTT0rx0eyZRxGgq4xEfsl_SSv2rjR5hfV6jwGEylkvZQ
+      select:
+        - Account.*
+        - Contact.*
+        - Lead.*
   loaders:
-  - name: target-jsonl
-    variant: andyh1203
-    pip_url: target-jsonl
+    - name: target-jsonl
+      variant: andyh1203
+      pip_url: target-jsonl
