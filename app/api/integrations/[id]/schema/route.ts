@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "../../../utils/supabaseClient";
-import { writeFile, unlink } from "fs/promises";
 import { spawn } from "child_process";
-import path from "path";
 
 export async function GET(
   req: NextRequest,
@@ -21,29 +19,28 @@ export async function GET(
       { status: 404 }
     );
   }
-  // 2. Write config to a temp file
-  const configPath = path.join("/tmp", `sf-config-${id}.json`);
-  const configObj = {
-    ...data.config,
-    ...data.secrets,
-  };
-  try {
-    await writeFile(configPath, JSON.stringify(configObj, null, 2));
-  } catch (err: any) {
-    return NextResponse.json(
-      { success: false, error: "Failed to write config file: " + err.message },
-      { status: 500 }
-    );
-  }
-  // 3. Run Meltano tap-salesforce in discovery mode
+
+  // 2. Run tap-salesforce discovery with secrets as environment variables
   return new Promise((resolve) => {
-    const meltano = spawn("meltano", [
-      "invoke",
-      "tap-salesforce",
-      "--discover",
-      "--config",
-      configPath,
-    ]);
+    const meltano = spawn(
+      "meltano",
+      ["invoke", "tap-salesforce", "--discover"],
+      {
+        env: {
+          ...process.env,
+          // Set tap-salesforce secrets as environment variables
+          TAP_SALESFORCE_CLIENT_ID: data.secrets.client_id,
+          TAP_SALESFORCE_CLIENT_SECRET: data.secrets.client_secret,
+          TAP_SALESFORCE_REFRESH_TOKEN: data.secrets.refresh_token,
+          // Also set non-sensitive config as env vars for discovery
+          TAP_SALESFORCE_INSTANCE_URL: data.config.instance_url,
+          TAP_SALESFORCE_START_DATE: data.config.start_date,
+          TAP_SALESFORCE_API_TYPE: data.config.api_type,
+          TAP_SALESFORCE_SELECT_FIELDS_BY_DEFAULT:
+            data.config.select_fields_by_default.toString(),
+        },
+      }
+    );
     let output = "";
     let errorOutput = "";
     meltano.stdout.on("data", (data) => {
@@ -52,44 +49,29 @@ export async function GET(
     meltano.stderr.on("data", (data) => {
       errorOutput += data.toString();
     });
-    meltano.on("close", async (code) => {
-      await unlink(configPath).catch(() => {});
+    meltano.on("close", (code) => {
       if (code === 0) {
-        // Try to parse the last JSON object in output as the catalog
-        let catalog = null;
         try {
-          // Find the last JSON object in output
-          const matches = output.match(/\{[\s\S]*\}/g);
-          if (matches && matches.length > 0) {
-            catalog = JSON.parse(matches[matches.length - 1]);
-          }
-        } catch (e) {}
-        resolve(
-          NextResponse.json(
-            { success: true, catalog, raw: output },
-            { status: 200 }
-          )
-        );
+          const catalog = JSON.parse(output);
+          resolve(
+            NextResponse.json({ success: true, catalog }, { status: 200 })
+          );
+        } catch (parseError) {
+          resolve(
+            NextResponse.json(
+              { success: false, error: "Failed to parse catalog JSON", output },
+              { status: 500 }
+            )
+          );
+        }
       } else {
         resolve(
           NextResponse.json(
-            {
-              success: false,
-              error: errorOutput || output || "Discovery failed",
-            },
+            { success: false, error: "Discovery failed", output: errorOutput },
             { status: 500 }
           )
         );
       }
-    });
-    meltano.on("error", async (err) => {
-      await unlink(configPath).catch(() => {});
-      resolve(
-        NextResponse.json(
-          { success: false, error: "Failed to run Meltano: " + err.message },
-          { status: 500 }
-        )
-      );
     });
   });
 }

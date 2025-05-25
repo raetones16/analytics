@@ -12,14 +12,13 @@ plugins:
       pip_url: git+https://github.com/MeltanoLabs/tap-salesforce.git@v1.9.0
       config:
         api_type: REST
-        start_date: '2025-05-25'
+        start_date: "2025-05-25"
         instance_url: https://orgfarm-b529f752a8-dev-ed.develop.my.salesforce.com
         select_fields_by_default: true
-        client_id: >-
-          3MVG9rZjd7MXFdLhJijJhmfE.82RDoHJG6OPSnpO0ElwZWIyGjhYb1IiVDTTvejunH61ZP.HKpMo6.NnGQWws
-        client_secret: 6E4BC5A69B12A710FD4DABE28DCF4D3DA92A871D28D3C8E33F1BA1885480182A
-        refresh_token: >-
-          5Aep8612EC5NxGKVYqSiuQbR7fu_T39AMcg2fpEiLpYVTT0rx0eyZRxGgq4xEfsl_SSv2rjR5hfV6jwGEylkvZQ
+        # Secrets are now handled via environment variables:
+        # TAP_SALESFORCE_CLIENT_ID
+        # TAP_SALESFORCE_CLIENT_SECRET
+        # TAP_SALESFORCE_REFRESH_TOKEN
       select:
         - Account.*
         - Contact.*
