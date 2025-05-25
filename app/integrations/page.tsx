@@ -84,13 +84,25 @@ export default function IntegrationsPage() {
     <div className="max-w-3xl mx-auto py-8 px-4">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Integrations</h1>
-        <button
-          className="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90 transition"
-          onClick={() => setShowAddModal(true)}
-        >
-          Add Integration
-        </button>
+        <div className="flex gap-2">
+          <button
+            className="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90 transition"
+            onClick={() => setShowAddModal(true)}
+          >
+            Add Integration
+          </button>
+          <button
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+            onClick={() => {
+              window.location.href = "/api/oauth/salesforce/start";
+            }}
+          >
+            Connect Salesforce
+          </button>
+        </div>
       </div>
+      <div className="mb-4 border-b border-gray-200" />
+      <div className="mb-4 text-lg font-semibold">Connected Integrations</div>
       {actionMessage && (
         <div className="mb-4 text-sm text-blue-700 bg-blue-100 rounded px-3 py-2">
           {actionMessage}

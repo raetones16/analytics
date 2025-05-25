@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "../../../../utils/supabaseClient";
+import { supabase } from "../../../utils/supabaseClient";
 import { writeFile, unlink } from "fs/promises";
 import { spawn } from "child_process";
 import path from "path";
@@ -40,7 +40,6 @@ export async function POST(
     const meltano = spawn("meltano", [
       "invoke",
       "tap-salesforce",
-      "--test",
       "--config",
       configPath,
     ]);

@@ -16,6 +16,57 @@ This document outlines the plan and progress for integrating external data sourc
 
 ---
 
+## Upcoming: Salesforce OAuth Flow for Seamless User Experience
+
+### **Why**
+
+- Manual credential entry is not user-friendly and creates friction.
+- A true OAuth flow (like Zapier) allows users to connect Salesforce with a single login/consent, no copy-pasting of tokens or secrets.
+
+### **High-Level Flow**
+
+1. User clicks "Connect Salesforce" in the UI.
+2. User is redirected to Salesforce's OAuth login/consent page.
+3. User logs in and authorizes the app.
+4. Salesforce redirects back to the app with an authorization code.
+5. The backend exchanges the code for a refresh token and access token.
+6. Tokens are stored securely and used for all future syncs/tests.
+7. User never sees or enters a client ID/secret/token.
+
+### **Implementation Steps**
+
+1. **Salesforce Setup (One-Time, Admin Only):**
+   - Register a Connected App in Salesforce.
+   - Get the Client ID and Client Secret.
+   - Set the OAuth callback URL to your backend (e.g., `/api/oauth/salesforce/callback`).
+2. **Frontend:**
+   - Replace manual credential fields with a "Connect Salesforce" button.
+   - Button triggers the OAuth flow via the backend.
+3. **Backend:**
+   - `/api/oauth/salesforce/start`: Redirects to Salesforce OAuth login.
+   - `/api/oauth/salesforce/callback`: Handles redirect, exchanges code for tokens, stores tokens securely.
+   - Associates tokens with the user's integration.
+4. **Integration with Meltano/Singer:**
+   - When running a sync or test, fetch the stored tokens and pass them to Meltano/tap-salesforce as config.
+5. **UI Feedback:**
+   - Show success message when connected.
+   - Allow disconnect/reconnect as needed.
+
+### **Complexity & Considerations**
+
+- **Moderate complexity:** Standard OAuth 2.0 flow, well-supported by Node.js libraries.
+- **Security:** Never expose client secret to frontend; store tokens securely.
+- **User Experience:** User only clicks "Connect" and logs in—no manual credential entry.
+
+### **Next Actions**
+
+- Set up Salesforce Connected App (admin task).
+- Scaffold backend OAuth endpoints.
+- Update frontend to use the new flow.
+- Test end-to-end with a Salesforce developer account.
+
+---
+
 ## Technical Approach
 
 - **Orchestration:** Use Meltano to manage connectors (Singer taps/targets), configuration, and scheduling.
