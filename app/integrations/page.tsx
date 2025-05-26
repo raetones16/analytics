@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AddIntegrationModal } from "./AddIntegrationModal";
+import { IntegrationSettings } from "./IntegrationSettings";
 
 interface Integration {
   id: string;
@@ -12,6 +13,11 @@ interface Integration {
   status: string;
   created_at: string;
   updated_at: string;
+  sync_frequency?: string;
+  sync_enabled?: boolean;
+  last_sync_at?: string;
+  next_sync_at?: string;
+  selected_fields?: Record<string, string[]>;
 }
 
 export default function IntegrationsPage() {
@@ -20,6 +26,8 @@ export default function IntegrationsPage() {
   const [error, setError] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [settingsIntegration, setSettingsIntegration] =
+    useState<Integration | null>(null);
 
   async function fetchIntegrations() {
     setLoading(true);
@@ -80,8 +88,34 @@ export default function IntegrationsPage() {
     }
   }
 
+  function getSyncStatusBadge(integration: Integration) {
+    if (!integration.sync_enabled) {
+      return (
+        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+          Manual
+        </span>
+      );
+    }
+
+    const now = new Date();
+    const nextSync = integration.next_sync_at
+      ? new Date(integration.next_sync_at)
+      : null;
+    const isOverdue = nextSync && nextSync < now;
+
+    return (
+      <span
+        className={`text-xs px-2 py-1 rounded ${
+          isOverdue ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"
+        }`}
+      >
+        {integration.sync_frequency} {isOverdue ? "(overdue)" : ""}
+      </span>
+    );
+  }
+
   return (
-    <div className="max-w-3xl mx-auto py-8 px-4">
+    <div className="max-w-5xl mx-auto py-8 px-4">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Integrations</h1>
         <div className="flex gap-2">
@@ -121,6 +155,8 @@ export default function IntegrationsPage() {
               <th className="p-2 text-left">Name</th>
               <th className="p-2 text-left">Type</th>
               <th className="p-2 text-left">Status</th>
+              <th className="p-2 text-left">Sync Schedule</th>
+              <th className="p-2 text-left">Last Sync</th>
               <th className="p-2 text-left">Created</th>
               <th className="p-2 text-left">Actions</th>
             </tr>
@@ -130,11 +166,35 @@ export default function IntegrationsPage() {
               <tr key={integration.id} className="border-t">
                 <td className="p-2 font-medium">{integration.name}</td>
                 <td className="p-2">{integration.type}</td>
-                <td className="p-2">{integration.status}</td>
                 <td className="p-2">
-                  {new Date(integration.created_at).toLocaleString()}
+                  <span
+                    className={`text-xs px-2 py-1 rounded ${
+                      integration.status === "connected"
+                        ? "bg-green-100 text-green-700"
+                        : integration.status === "error"
+                        ? "bg-red-100 text-red-700"
+                        : "bg-gray-100 text-gray-700"
+                    }`}
+                  >
+                    {integration.status}
+                  </span>
                 </td>
-                <td className="p-2 flex gap-2">
+                <td className="p-2">{getSyncStatusBadge(integration)}</td>
+                <td className="p-2">
+                  {integration.last_sync_at
+                    ? new Date(integration.last_sync_at).toLocaleDateString()
+                    : "Never"}
+                </td>
+                <td className="p-2">
+                  {new Date(integration.created_at).toLocaleDateString()}
+                </td>
+                <td className="p-2 flex gap-1 flex-wrap">
+                  <button
+                    className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded hover:bg-purple-200"
+                    onClick={() => setSettingsIntegration(integration)}
+                  >
+                    Settings
+                  </button>
                   <button
                     className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200"
                     onClick={() => handleTest(integration.id)}
@@ -159,11 +219,21 @@ export default function IntegrationsPage() {
           </tbody>
         </table>
       )}
+
       <AddIntegrationModal
         open={showAddModal}
         onOpenChange={setShowAddModal}
         onIntegrationAdded={fetchIntegrations}
       />
+
+      {settingsIntegration && (
+        <IntegrationSettings
+          integration={settingsIntegration}
+          open={!!settingsIntegration}
+          onOpenChange={(open) => !open && setSettingsIntegration(null)}
+          onUpdated={fetchIntegrations}
+        />
+      )}
     </div>
   );
 }

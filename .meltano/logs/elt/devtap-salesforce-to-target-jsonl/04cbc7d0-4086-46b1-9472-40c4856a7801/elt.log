@@ -1,0 +1,3 @@
+2025-05-26T07:48:27.216724Z [warning  ] Force option is enabled, ignoring stale job check.
+2025-05-26T07:48:27.312697Z [info     ] Using systemdb state backend
+2025-05-26T08:37:20.592152Z [warning  ] Loop <_UnixSelectorEventLoop running=False closed=True debug=False> that handles pid 89472 is closed

@@ -1,0 +1,16 @@
+2025-05-25T20:38:06.802336Z [warning  ] Force option is enabled, ignoring stale job check.
+2025-05-25T20:38:06.909684Z [info     ] Using systemdb state backend
+2025-05-25T20:38:08.456467Z [error    ] Cannot start plugin tap-salesforce: Catalog discovery failed: command ['/Users/tim.prudames/analytics/.meltano/extractors/tap-salesforce/venv/bin/tap-salesforce', '--config', '/Users/tim.prudames/analytics/.meltano/run/tap-salesforce/tap.c0208d99-b69b-4b17-8864-97a02d26a3b9.config.json', '--state', '/Users/tim.prudames/analytics/.meltano/run/tap-salesforce/state.json', '--discover'] returned 2 with stderr:
+ /Users/tim.prudames/analytics/.meltano/extractors/tap-salesforce/venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+INFO Parsed start date '2025-05-25T00:00:00+00:00' from value '2025-05-25'
+INFO Attempting login via OAuth2
+INFO OAuth2 login successful
+INFO Starting new login timer
+INFO Start discovery for all streams
+INFO Making GET request to https://orgfarm-b529f752a8-dev-ed.develop.my.salesforce.com/services/data/v60.0/sobjects with params: None
+INFO Used 13155 of 15000 daily REST API quota
+INFO METRIC: {"type": "timer", "metric": "http_request_duration", "value": 0.6713087558746338, "tags": {"endpoint": "sobjects", "status": "failed"}}
+CRITICAL Salesforce has reported 13155/15000 (87.70%) total REST quota used across all Salesforce Applications. Terminating replication to not continue past configured percentage of 80% total quota.
+
+2025-05-25T20:38:08.456691Z [error    ] Block run completed.           block_type=ExtractLoadBlocks err=RunnerError('Cannot start plugin tap-salesforce: Catalog discovery failed: command [\'/Users/tim.prudames/analytics/.meltano/extractors/tap-salesforce/venv/bin/tap-salesforce\', \'--config\', \'/Users/tim.prudames/analytics/.meltano/run/tap-salesforce/tap.c0208d99-b69b-4b17-8864-97a02d26a3b9.config.json\', \'--state\', \'/Users/tim.prudames/analytics/.meltano/run/tap-salesforce/state.json\', \'--discover\'] returned 2 with stderr:\n /Users/tim.prudames/analytics/.meltano/extractors/tap-salesforce/venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the \'ssl\' module is compiled with \'LibreSSL 2.8.3\'. See: https://github.com/urllib3/urllib3/issues/3020\n  warnings.warn(\nINFO Parsed start date \'2025-05-25T00:00:00+00:00\' from value \'2025-05-25\'\nINFO Attempting login via OAuth2\nINFO OAuth2 login successful\nINFO Starting new login timer\nINFO Start discovery for all streams\nINFO Making GET request to https://orgfarm-b529f752a8-dev-ed.develop.my.salesforce.com/services/data/v60.0/sobjects with params: None\nINFO Used 13155 of 15000 daily REST API quota\nINFO METRIC: {"type": "timer", "metric": "http_request_duration", "value": 0.6713087558746338, "tags": {"endpoint": "sobjects", "status": "failed"}}\nCRITICAL Salesforce has reported 13155/15000 (87.70%) total REST quota used across all Salesforce Applications. Terminating replication to not continue past configured percentage of 80% total quota.\n') exit_codes={} set_number=0 success=False

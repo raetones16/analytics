@@ -2,28 +2,25 @@ version: 1
 default_environment: dev
 project_id: 721350f9-ff5f-407b-8896-e582bca49146
 environments:
-  - name: dev
-  - name: staging
-  - name: prod
+- name: dev
+- name: staging
+- name: prod
 plugins:
   extractors:
-    - name: tap-salesforce
-      variant: meltanolabs
-      pip_url: git+https://github.com/MeltanoLabs/tap-salesforce.git@v1.9.0
-      config:
-        api_type: REST
-        start_date: "2025-05-25"
-        instance_url: https://orgfarm-b529f752a8-dev-ed.develop.my.salesforce.com
-        select_fields_by_default: true
-        # Secrets are now handled via environment variables:
-        # TAP_SALESFORCE_CLIENT_ID
-        # TAP_SALESFORCE_CLIENT_SECRET
-        # TAP_SALESFORCE_REFRESH_TOKEN
-      select:
-        - Account.*
-        - Contact.*
-        - Lead.*
+  - name: tap-salesforce
+    variant: meltanolabs
+    pip_url: git+https://github.com/MeltanoLabs/tap-salesforce.git@v1.9.0
+    config:
+      api_type: REST
+      start_date: '2025-05-25'
+      instance_url: https://orgfarm-b529f752a8-dev-ed.develop.my.salesforce.com
+      select_fields_by_default: true
+      quota_percent_total: '99'
+    select:
+    - Account.*
+    - Contact.*
+    - Lead.*
   loaders:
-    - name: target-jsonl
-      variant: andyh1203
-      pip_url: target-jsonl
+  - name: target-jsonl
+    variant: andyh1203
+    pip_url: target-jsonl

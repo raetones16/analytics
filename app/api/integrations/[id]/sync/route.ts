@@ -77,6 +77,13 @@ export async function POST(
       });
       meltano.on("close", async (code) => {
         if (code === 0) {
+          // Update last_sync_at timestamp in database
+          const now = new Date().toISOString();
+          await supabase
+            .from("integrations")
+            .update({ last_sync_at: now })
+            .eq("id", id);
+
           resolve(
             NextResponse.json(
               { success: true, message: "Sync completed!", output },
